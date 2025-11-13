@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Mycelix Marketplace - Decentralized P2P marketplace powered by Holochain. Trade directly with peers, no middlemen, complete sovereignty.">
+    <meta name="keywords" content="holochain, decentralized, p2p, marketplace, blockchain, web3, dht">
+    <title>Mycelix Marketplace - Decentralized P2P Commerce</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #2d3748;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            padding: 4rem 0;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .tagline {
+            font-size: 1.5rem;
+            opacity: 0.95;
+            margin-bottom: 0.5rem;
+        }
+
+        .version {
+            font-size: 1rem;
+            opacity: 0.85;
+        }
+
+        .content {
+            background: white;
+            border-radius: 12px;
+            padding: 3rem;
+            margin: 2rem 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .feature {
+            padding: 1.5rem;
+            border-left: 4px solid #667eea;
+            background: #f7fafc;
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+
+        .feature:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .feature h3 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 2rem 0;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin: 3rem 0;
+            padding: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            color: white;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .tech-item {
+            padding: 1rem;
+            background: #f7fafc;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .tech-item strong {
+            color: #667eea;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            padding: 2rem 0;
+            opacity: 0.9;
+        }
+
+        footer a {
+            color: white;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        footer a:hover {
+            opacity: 0.8;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: #48bb78;
+            color: white;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin: 0.25rem;
+        }
+
+        .badge.alpha {
+            background: #ed8936;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .tagline {
+                font-size: 1.2rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .stat-value {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍄 Mycelix Marketplace</h1>
+            <p class="tagline">Decentralized P2P Commerce for the Future</p>
+            <p class="version">
+                <span class="badge alpha">v1.0.0-alpha</span>
+                <span class="badge">Open Source</span>
+                <span class="badge">Apache 2.0</span>
+            </p>
+        </header>
+
+        <div class="content">
+            <h2>What is Mycelix Marketplace?</h2>
+            <p style="font-size: 1.1rem; margin: 1rem 0;">
+                A truly decentralized peer-to-peer marketplace built on <strong>Holochain</strong>,
+                enabling direct P2P trading without middlemen, complete data sovereignty,
+                and community-driven trust through innovative consensus mechanisms.
+            </p>
+
+            <div class="cta-buttons">
+                <a href="https://github.com/Luminous-Dynamics/Mycelix-Marketplace" class="btn btn-primary">
+                    📦 View on GitHub
+                </a>
+                <a href="https://github.com/Luminous-Dynamics/Mycelix-Marketplace#readme" class="btn btn-secondary">
+                    📚 Read Documentation
+                </a>
+            </div>
+
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value">10</div>
+                    <div class="stat-label">Functional Pages</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">TypeScript Errors</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">100%</div>
+                    <div class="stat-label">Type Safe</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">75%</div>
+                    <div class="stat-label">A11y Improved</div>
+                </div>
+            </div>
+
+            <h2>✨ Key Features</h2>
+            <div class="features">
+                <div class="feature">
+                    <h3>🌐 Direct P2P Trading</h3>
+                    <p>No servers, no middlemen - just peers trading directly through Holochain's distributed hash table</p>
+                </div>
+                <div class="feature">
+                    <h3>🔒 Data Sovereignty</h3>
+                    <p>You own your data, always. Complete privacy and control over your information</p>
+                </div>
+                <div class="feature">
+                    <h3>⚖️ MRC Arbitration</h3>
+                    <p>Community-driven dispute resolution via Mutual Reputation Consensus</p>
+                </div>
+                <div class="feature">
+                    <h3>🎯 PoGQ Trust System</h3>
+                    <p>Proof of Generalized Quality reputation system without centralization</p>
+                </div>
+                <div class="feature">
+                    <h3>💸 Zero Platform Fees</h3>
+                    <p>No platform fees whatsoever - optional tipping to arbitrators only</p>
+                </div>
+                <div class="feature">
+                    <h3>🌍 Censorship-Resistant</h3>
+                    <p>No single point of control or failure - truly unstoppable commerce</p>
+                </div>
+            </div>
+
+            <h2>🛠️ Tech Stack</h2>
+            <div class="tech-stack">
+                <div class="tech-item">
+                    <strong>SvelteKit 2.0</strong><br>
+                    Modern web framework
+                </div>
+                <div class="tech-item">
+                    <strong>TypeScript 5.3</strong><br>
+                    100% type safety
+                </div>
+                <div class="tech-item">
+                    <strong>Holochain 0.5.x</strong><br>
+                    Distributed framework
+                </div>
+                <div class="tech-item">
+                    <strong>IPFS</strong><br>
+                    Decentralized storage
+                </div>
+                <div class="tech-item">
+                    <strong>Vite 5.0</strong><br>
+                    Lightning builds
+                </div>
+            </div>
+
+            <h2>🚀 Current Status: Phase 4 Complete</h2>
+            <p style="margin: 1rem 0;">
+                The marketplace frontend is fully functional with 10 complete pages,
+                100% TypeScript type safety, and comprehensive accessibility improvements.
+            </p>
+
+            <ul style="margin: 1rem 0; padding-left: 2rem;">
+                <li>✅ Browse listings with filtering and search</li>
+                <li>✅ Detailed product pages with photo galleries</li>
+                <li>✅ Shopping cart and checkout flow</li>
+                <li>✅ User dashboard and transaction history</li>
+                <li>✅ Create and manage listings</li>
+                <li>✅ Review and rating system</li>
+                <li>✅ Dispute filing interface</li>
+                <li>✅ MRC arbitration system</li>
+                <li>🚧 Backend integration (Phase 5)</li>
+                <li>🚧 E2E testing (Phase 5)</li>
+            </ul>
+
+            <h2>🤝 Contributing</h2>
+            <p style="margin: 1rem 0;">
+                We welcome contributions! This project is open source under the Apache 2.0 license.
+                Whether you're interested in Holochain development, SvelteKit, or decentralized systems,
+                there's a place for you in this project.
+            </p>
+
+            <div class="cta-buttons">
+                <a href="https://github.com/Luminous-Dynamics/Mycelix-Marketplace/issues" class="btn btn-secondary">
+                    🐛 Report Issues
+                </a>
+                <a href="https://github.com/Luminous-Dynamics/Mycelix-Marketplace/fork" class="btn btn-secondary">
+                    🔱 Fork Repository
+                </a>
+            </div>
+        </div>
+
+        <footer>
+            <p style="margin-bottom: 0.5rem;">Built with ❤️ by <strong>Luminous Dynamics</strong></p>
+            <p>
+                <a href="https://mycelix.net">mycelix.net</a> |
+                <a href="https://github.com/Luminous-Dynamics">GitHub</a> |
+                <a href="https://github.com/Luminous-Dynamics/Mycelix-Marketplace/blob/main/LICENSE">Apache 2.0 License</a>
+            </p>
+            <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;">
+                🍄 Making decentralized commerce accessible to all
+            </p>
+        </footer>
+    </div>
+</body>
+</html>
