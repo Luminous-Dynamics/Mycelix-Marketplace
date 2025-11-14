@@ -201,7 +201,7 @@
                   class:active={index === selectedImageIndex}
                   on:click={() => (selectedImageIndex = index)}
                 >
-                  <img src="https://ipfs.io/ipfs/{cid}" alt="Thumbnail {index + 1}" />
+                  <img src="https://ipfs.io/ipfs/{cid}" alt="Thumbnail {index + 1}" loading="lazy" decoding="async" />
                 </button>
               {/each}
             </div>
@@ -228,7 +228,7 @@
             <div class="seller-card">
               <div class="seller-avatar">
                 {#if seller.avatar_cid}
-                  <img src="https://ipfs.io/ipfs/{seller.avatar_cid}" alt={seller.username} />
+                  <img src="https://ipfs.io/ipfs/{seller.avatar_cid}" alt={seller.username} loading="lazy" decoding="async" />
                 {:else}
                   <div class="avatar-placeholder">
                     {seller.username.charAt(0).toUpperCase()}

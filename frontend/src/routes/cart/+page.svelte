@@ -108,7 +108,7 @@
               <!-- Item Image -->
               <div class="item-image">
                 {#if item.photo_cid}
-                  <img src={getIpfsUrl(item.photo_cid)} alt={item.title} />
+                  <img src={getIpfsUrl(item.photo_cid)} alt={item.title} loading="lazy" decoding="async" />
                 {:else}
                   <div class="no-image">No Image</div>
                 {/if}

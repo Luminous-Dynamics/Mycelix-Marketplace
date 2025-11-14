@@ -312,6 +312,8 @@
                   <img
                     src="https://ipfs.io/ipfs/{listing.photos_ipfs_cids[0]}"
                     alt={listing.title}
+                    loading="lazy"
+                    decoding="async"
                   />
                 {:else}
                   <div class="image-placeholder">📷</div>

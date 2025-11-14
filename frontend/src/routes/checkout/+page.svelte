@@ -549,7 +549,7 @@
                     <div class="review-item">
                       <div class="item-thumbnail">
                         {#if item.photo_cid}
-                          <img src={getIpfsUrl(item.photo_cid)} alt={item.title} />
+                          <img src={getIpfsUrl(item.photo_cid)} alt={item.title} loading="lazy" decoding="async" />
                         {:else}
                           <div class="no-image">📷</div>
                         {/if}
