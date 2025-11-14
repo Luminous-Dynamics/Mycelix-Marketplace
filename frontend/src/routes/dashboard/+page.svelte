@@ -17,6 +17,8 @@
   import { getMyListings } from '$lib/holochain/listings';
   import { getMyPurchases, getMySales } from '$lib/holochain/transactions';
   import { notifications } from '$lib/stores';
+  import { handleError } from '$lib/utils/errors';
+  import { formatRelativeTime } from '$lib/utils/format';
   import type { UserProfile, Listing, Transaction } from '$types';
 
   // State
@@ -54,28 +56,13 @@
       recentTransactions = allTransactions.slice(0, 5);
 
       notifications.success('Dashboard Loaded', `Welcome back, ${profile.username}!`);
-    } catch (e: any) {
-      error = e.message || 'Failed to load dashboard';
+    } catch (e: unknown) {
+      error = handleError(e, 'Dashboard Load');
       notifications.error('Loading Failed', error);
     } finally {
       loading = false;
     }
   });
-
-  /**
-   * Format date to relative time
-   */
-  function formatDate(timestamp: number): string {
-    const now = Date.now();
-    const diff = now - timestamp;
-    const days = Math.floor(diff / (24 * 60 * 60 * 1000));
-    if (days === 0) return 'Today';
-    if (days === 1) return 'Yesterday';
-    if (days < 7) return `${days} days ago`;
-    if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
-    if (days < 365) return `${Math.floor(days / 30)} months ago`;
-    return `${Math.floor(days / 365)} years ago`;
-  }
 
   /**
    * Format trust score
@@ -123,7 +110,7 @@
           </div>
           <div class="profile-info">
             <h1>{profile.username}</h1>
-            <p class="member-since">Member since {formatDate(profile.member_since)}</p>
+            <p class="member-since">Member since {formatRelativeTime(profile.member_since)}</p>
             <div class="trust-score">
               <span class="trust-label">Trust Score:</span>
               <span class="trust-value">{formatTrustScore(profile.trust_score)}</span>
@@ -202,7 +189,7 @@
                 >
                   <div class="transaction-info">
                     <span class="transaction-title">Transaction #{tx.id.slice(0, 8)}...</span>
-                    <span class="transaction-date">{formatDate(tx.created_at)}</span>
+                    <span class="transaction-date">{formatRelativeTime(tx.created_at)}</span>
                   </div>
                   <div class="transaction-meta">
                     <span class={`status-badge status-${tx.status}`}>{tx.status}</span>
@@ -258,7 +245,7 @@
                     <h3>{listing.title}</h3>
                     <p class="listing-price">${listing.price.toFixed(2)}</p>
                     <p class="listing-meta">
-                      {listing.quantity_available} available · {formatDate(listing.created_at)}
+                      {listing.quantity_available} available · {formatRelativeTime(listing.created_at)}
                     </p>
                   </div>
                 </button>

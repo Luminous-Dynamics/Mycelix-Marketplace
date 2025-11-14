@@ -25,6 +25,7 @@
   import { getMyPurchases, getMySales, confirmDelivery as confirmDeliveryZome, markAsShipped as markAsShippedZome } from '$lib/holochain/transactions';
   import { notifications } from '$lib/stores';
   import { currentUser } from '$lib/stores/auth';
+  import { handleError } from '$lib/utils/errors';
   import type { Transaction, TransactionStatus } from '$types';
 
   // Extended transaction type with UI-specific fields
@@ -96,8 +97,8 @@
       );
 
       notifications.success('Transactions loaded', `Found ${transactions.length} transactions`);
-    } catch (e: any) {
-      error = e.message || 'Failed to load transactions';
+    } catch (e: unknown) {
+      error = handleError(e, 'Transactions Load');
       notifications.error('Failed to load transactions', error);
       console.error('Error loading transactions:', e);
     } finally {

@@ -1,0 +1,120 @@
+╔════════════════════════════════════════════════════════════════════════════════╗
+║         PHASE 4.7 - FRONTEND CODE QUALITY AUDIT - QUICK REFERENCE             ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+TOTAL ISSUES FOUND: 20 (5 HIGH | 7 HIGH/MEDIUM | 2 MEDIUM | 1 MEDIUM | 5 LOW)
+
+═════════════════════════════════════════════════════════════════════════════════
+
+CATEGORY 1: ERROR HANDLERS WITH `: any` TYPE (5 ISSUES - ALL HIGH PRIORITY)
+─────────────────────────────────────────────────────────────────────────────────
+
+  ✗ checkout/+page.svelte:88          catch (e: any)
+  ✗ dashboard/+page.svelte:57         catch (e: any)
+  ✗ transactions/+page.svelte:99      catch (e: any)
+  ✗ listing/[listing_hash]/+page.svelte:66  catch (e: any)
+  ✗ mrc-arbitration/+page.svelte:93   catch (e: any)
+
+FIX: Replace with `catch (e: unknown)` and use type guards via handleError()
+
+
+═════════════════════════════════════════════════════════════════════════════════
+
+CATEGORY 2: HARDCODED IPFS URLS
+─────────────────────────────────────────────────────────────────────────────────
+
+  ✓ NO ISSUES FOUND - Already centralized in constants.ts
+
+
+═════════════════════════════════════════════════════════════════════════════════
+
+CATEGORY 3: DUPLICATE FUNCTIONS (1 ISSUE - MEDIUM PRIORITY)
+─────────────────────────────────────────────────────────────────────────────────
+
+  ✗ dashboard/+page.svelte:68-78     formatDate() [duplicate]
+
+FIX: Import formatRelativeTime from $lib/utils/format
+
+
+═════════════════════════════════════════════════════════════════════════════════
+
+CATEGORY 4: DUPLICATE/HARDCODED CONSTANTS (13 ISSUES - HIGH & MEDIUM PRIORITY)
+─────────────────────────────────────────────────────────────────────────────────
+
+HIGH PRIORITY (4):
+  ✗ lib/holochain/client.ts:20,25,30    DEFAULT_WS_URL, MAX_RECONNECT_ATTEMPTS, RECONNECT_DELAY
+  ✗ lib/stores/cart.ts:14,19            TAX_RATE, SHIPPING_COST
+  ✗ lib/stores/holochain.ts:47          'ws://localhost:8888'
+  ✗ lib/utils/validation.ts:8-24        ALLOWED_IMAGE_TYPES, MAX_FILE_SIZE, MAX_PHOTOS_PER_LISTING
+
+MEDIUM PRIORITY (2):
+  ✗ routes/browse/+page.svelte:37       maxPrice = 10000
+  ✗ routes/create-listing/+page.svelte:141  price > 1000000
+
+MEDIUM PRIORITY (2):
+  ✗ cart/+page.svelte:60-62             formatCurrency() [duplicate]
+
+
+═════════════════════════════════════════════════════════════════════════════════
+
+CATEGORY 5: TYPE GUARD ISSUES (1 ISSUE - LOW PRIORITY)
+─────────────────────────────────────────────────────────────────────────────────
+
+  ✗ lib/utils/validation.ts:38        ALLOWED_IMAGE_TYPES.includes(file.type as any)
+
+FIX: Use proper type assertion instead of `as any`
+
+
+═════════════════════════════════════════════════════════════════════════════════
+
+RECOMMENDED FIX ORDER (12 files to modify):
+─────────────────────────────────────────────────────────────────────────────────
+
+PHASE 1 (High Priority - Critical Type Safety):
+  1. lib/holochain/client.ts          - Import constants, remove duplicates
+  2. lib/stores/cart.ts               - Import constants, remove duplicates
+  3. lib/stores/holochain.ts          - Import constant, fix hardcoded URL
+  4. lib/utils/validation.ts          - Import constants, fix type guards
+
+PHASE 2 (High Priority - Error Handling):
+  5. routes/checkout/+page.svelte     - Fix catch (e: any)
+  6. routes/dashboard/+page.svelte    - Fix catch (e: any), remove formatDate
+  7. routes/transactions/+page.svelte - Fix catch (e: any)
+  8. routes/listing/[listing_hash]/+page.svelte - Fix catch (e: any)
+  9. routes/mrc-arbitration/+page.svelte - Fix catch (e: any)
+
+PHASE 3 (Medium Priority - Consolidate Utilities):
+  10. routes/browse/+page.svelte      - Use MAX_LISTING_PRICE constant
+  11. routes/create-listing/+page.svelte - Use MAX_LISTING_PRICE constant
+  12. routes/cart/+page.svelte        - Use formatPrice function
+
+
+═════════════════════════════════════════════════════════════════════════════════
+
+KEY METRICS:
+─────────────────────────────────────────────────────────────────────────────────
+
+Type Safety Issues (any type):      5 issues → CRITICAL
+Duplicate Constants:                 13 instances → Violate DRY principle
+Code Duplication:                    2 functions → Maintainability risk
+Files to Refactor:                   12 files
+Estimated Fix Time:                  2-3 hours (with testing)
+
+═════════════════════════════════════════════════════════════════════════════════
+
+VALIDATION CHECKLIST:
+─────────────────────────────────────────────────────────────────────────────────
+
+Before committing Phase 4.7:
+
+  [ ] All catch blocks use catch (e: unknown)
+  [ ] No duplicate constants in any file
+  [ ] All constants imported from $lib/config/constants
+  [ ] No duplicate utility functions
+  [ ] TypeScript compiler: tsc --noEmit (0 errors)
+  [ ] All imports resolved correctly
+  [ ] No unused imports
+  [ ] Tests pass: npm test
+  [ ] Browser test: npm run dev (manual verification)
+
+═════════════════════════════════════════════════════════════════════════════════

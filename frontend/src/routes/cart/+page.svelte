@@ -4,6 +4,7 @@
   import { notifications } from '$lib/stores';
   import { getIpfsUrl } from '$lib/ipfs/ipfsClient';
   import { DEFAULT_TAX_RATE } from '$lib/config/constants';
+  import { formatPrice } from '$lib/utils/format';
 
   /**
    * Remove item from cart
@@ -52,13 +53,6 @@
    */
   function proceedToCheckout() {
     goto('/checkout');
-  }
-
-  /**
-   * Format currency
-   */
-  function formatCurrency(amount: number): string {
-    return `$${amount.toFixed(2)}`;
   }
 
 </script>
@@ -124,7 +118,7 @@
               <div class="item-details">
                 <h3 class="item-title">{item.title}</h3>
                 <p class="item-seller">Sold by {item.seller_name}</p>
-                <p class="item-price">{formatCurrency(item.price)} each</p>
+                <p class="item-price">{formatPrice(item.price, 'USD')} each</p>
               </div>
 
               <!-- Item Quantity -->
@@ -162,7 +156,7 @@
               <!-- Item Total -->
               <div class="item-total">
                 <span class="item-total-label">Total</span>
-                <p class="total-price">{formatCurrency(item.price * item.quantity)}</p>
+                <p class="total-price">{formatPrice(item.price * item.quantity, 'USD')}</p>
               </div>
 
               <!-- Remove Button -->
@@ -200,24 +194,24 @@
 
           <div class="summary-row">
             <span>Subtotal ({$itemCount} {$itemCount === 1 ? 'item' : 'items'})</span>
-            <span>{formatCurrency($subtotal)}</span>
+            <span>{formatPrice($subtotal, 'USD')}</span>
           </div>
 
           <div class="summary-row">
             <span>Shipping</span>
-            <span>{formatCurrency($shipping)}</span>
+            <span>{formatPrice($shipping, 'USD')}</span>
           </div>
 
           <div class="summary-row">
             <span>Tax ({(DEFAULT_TAX_RATE * 100).toFixed(0)}%)</span>
-            <span>{formatCurrency($tax)}</span>
+            <span>{formatPrice($tax, 'USD')}</span>
           </div>
 
           <div class="summary-divider"></div>
 
           <div class="summary-row summary-total">
             <span>Total</span>
-            <span>{formatCurrency($total)}</span>
+            <span>{formatPrice($total, 'USD')}</span>
           </div>
 
           <button class="btn btn-primary btn-checkout" on:click={proceedToCheckout}>

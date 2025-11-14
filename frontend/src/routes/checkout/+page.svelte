@@ -27,6 +27,7 @@
   import { notifications } from '$lib/stores';
   import { initHolochainClient } from '$lib/holochain';
   import { createTransaction } from '$lib/holochain/transactions';
+  import { handleError } from '$lib/utils/errors';
   import type { CartItem, PaymentMethod, CreateTransactionInput } from '$types';
 
   // Cart state (from store)
@@ -85,8 +86,8 @@
       } else {
         notifications.info('Checkout', `${cartItemsList.length} items in cart`);
       }
-    } catch (e: any) {
-      error = e.message || 'Failed to load cart';
+    } catch (e: unknown) {
+      error = handleError(e, 'Checkout Load');
       notifications.error('Failed to load cart', error);
     } finally {
       loading = false;

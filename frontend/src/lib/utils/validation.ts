@@ -3,25 +3,13 @@
  */
 
 /**
- * Allowed image MIME types
+ * Re-export validation constants from centralized config
  */
-export const ALLOWED_IMAGE_TYPES = [
-  'image/jpeg',
-  'image/jpg',
-  'image/png',
-  'image/webp',
-  'image/gif',
-] as const;
-
-/**
- * Maximum file size (5MB)
- */
-export const MAX_FILE_SIZE = 5 * 1024 * 1024;
-
-/**
- * Maximum number of photos per listing
- */
-export const MAX_PHOTOS_PER_LISTING = 10;
+export {
+  ALLOWED_IMAGE_TYPES,
+  MAX_FILE_SIZE,
+  MAX_PHOTOS_PER_LISTING,
+} from '$lib/config/constants';
 
 /**
  * File validation result
@@ -35,7 +23,7 @@ export interface FileValidationResult {
  * Validate image file type
  */
 export function isValidImageType(file: File): boolean {
-  return ALLOWED_IMAGE_TYPES.includes(file.type as any);
+  return (ALLOWED_IMAGE_TYPES as readonly string[]).includes(file.type);
 }
 
 /**

@@ -28,6 +28,7 @@
     castArbitratorVote,
   } from '$lib/holochain/disputes';
   import { notifications } from '$lib/stores';
+  import { handleError } from '$lib/utils/errors';
   import type { Dispute, ArbitratorProfile, CastVoteInput } from '$types';
 
   // Arbitrator state
@@ -90,8 +91,8 @@
         'MRC Interface Loaded',
         `${pendingDisputes.length} pending, ${activeDisputes.length} active cases`
       );
-    } catch (e: any) {
-      error = e.message || 'Failed to load arbitration interface';
+    } catch (e: unknown) {
+      error = handleError(e, 'MRC Arbitration Load');
       notifications.error('Loading Failed', error);
     } finally {
       loading = false;

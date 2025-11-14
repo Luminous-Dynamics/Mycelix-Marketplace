@@ -6,17 +6,8 @@
 
 import { writable, derived } from 'svelte/store';
 import { browser } from '$app/environment';
+import { DEFAULT_TAX_RATE, DEFAULT_SHIPPING_COST } from '$lib/config/constants';
 import type { CartItem, CartState } from '$types';
-
-/**
- * Tax rate (8%)
- */
-const TAX_RATE = 0.08;
-
-/**
- * Flat shipping rate
- */
-const SHIPPING_COST = 5.99;
 
 /**
  * localStorage key
@@ -151,12 +142,12 @@ export const subtotal = derived(cartItems, ($items) =>
 /**
  * Derived store: tax
  */
-export const tax = derived(subtotal, ($subtotal) => $subtotal * TAX_RATE);
+export const tax = derived(subtotal, ($subtotal) => $subtotal * DEFAULT_TAX_RATE);
 
 /**
  * Derived store: shipping
  */
-export const shipping = derived(cartItems, ($items) => ($items.length > 0 ? SHIPPING_COST : 0));
+export const shipping = derived(cartItems, ($items) => ($items.length > 0 ? DEFAULT_SHIPPING_COST : 0));
 
 /**
  * Derived store: total

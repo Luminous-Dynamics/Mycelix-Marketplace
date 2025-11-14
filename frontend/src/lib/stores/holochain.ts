@@ -6,6 +6,7 @@
 
 import { writable, derived } from 'svelte/store';
 import type { AppClient } from '@holochain/client';
+import { DEFAULT_HOLOCHAIN_WS_URL } from '$lib/config/constants';
 
 /**
  * Connection status
@@ -44,7 +45,7 @@ const initialState: HolochainState = {
   error: null,
   attempts: 0,
   lastAttempt: null,
-  url: 'ws://localhost:8888',
+  url: DEFAULT_HOLOCHAIN_WS_URL,
 };
 
 /**

@@ -18,6 +18,7 @@
   import { createTransaction } from '$lib/holochain/transactions';
   import { cartItems } from '$lib/stores/cart';
   import { notifications } from '$lib/stores';
+  import { handleError } from '$lib/utils/errors';
   import type { ListingWithContext, Review, SellerInfo, CreateTransactionInput } from '$types';
 
   // Route parameter
@@ -63,8 +64,8 @@
       reviews = listingData.reviews || [];
 
       notifications.success('Listing Loaded', listing.title);
-    } catch (e: any) {
-      error = e.message || 'Failed to load listing';
+    } catch (e: unknown) {
+      error = handleError(e, 'Listing Load');
       notifications.error('Loading Failed', error);
     } finally {
       loading = false;

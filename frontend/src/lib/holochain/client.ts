@@ -13,21 +13,11 @@
 import { AppWebsocket, type AppClient, type AppInfo } from '@holochain/client';
 import { holochain } from '$lib/stores';
 import { get } from 'svelte/store';
-
-/**
- * Default WebSocket URL
- */
-const DEFAULT_WS_URL = 'ws://localhost:8888';
-
-/**
- * Maximum reconnection attempts
- */
-const MAX_RECONNECT_ATTEMPTS = 5;
-
-/**
- * Reconnection delay (milliseconds)
- */
-const RECONNECT_DELAY = 1000;
+import {
+  DEFAULT_HOLOCHAIN_WS_URL,
+  HOLOCHAIN_MAX_RECONNECT_ATTEMPTS,
+  HOLOCHAIN_RECONNECT_DELAY,
+} from '$lib/config/constants';
 
 /**
  * App info cache
@@ -40,7 +30,7 @@ let appInfoCache: AppInfo | null = null;
  * @param url - WebSocket URL (default: ws://localhost:8888)
  * @returns AppClient instance
  */
-export async function initHolochainClient(url: string = DEFAULT_WS_URL): Promise<AppClient> {
+export async function initHolochainClient(url: string = DEFAULT_HOLOCHAIN_WS_URL): Promise<AppClient> {
   const currentState = get(holochain);
 
   // Return existing client if already connected
@@ -53,7 +43,7 @@ export async function initHolochainClient(url: string = DEFAULT_WS_URL): Promise
 
   let lastError: Error | null = null;
 
-  for (let attempt = 0; attempt < MAX_RECONNECT_ATTEMPTS; attempt++) {
+  for (let attempt = 0; attempt < HOLOCHAIN_MAX_RECONNECT_ATTEMPTS; attempt++) {
     try {
       holochain.incrementAttempts();
 
@@ -72,15 +62,15 @@ export async function initHolochainClient(url: string = DEFAULT_WS_URL): Promise
       lastError = error as Error;
       console.error(`Connection attempt ${attempt + 1} failed:`, error);
 
-      if (attempt < MAX_RECONNECT_ATTEMPTS - 1) {
+      if (attempt < HOLOCHAIN_MAX_RECONNECT_ATTEMPTS - 1) {
         // Wait before retrying
-        await new Promise((resolve) => setTimeout(resolve, RECONNECT_DELAY * (attempt + 1)));
+        await new Promise((resolve) => setTimeout(resolve, HOLOCHAIN_RECONNECT_DELAY * (attempt + 1)));
       }
     }
   }
 
   // All attempts failed
-  const errorMessage = `Failed to connect to Holochain after ${MAX_RECONNECT_ATTEMPTS} attempts: ${lastError?.message}`;
+  const errorMessage = `Failed to connect to Holochain after ${HOLOCHAIN_MAX_RECONNECT_ATTEMPTS} attempts: ${lastError?.message}`;
   holochain.setError(errorMessage);
   throw new Error(errorMessage);
 }
