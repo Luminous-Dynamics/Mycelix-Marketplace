@@ -5,6 +5,7 @@
   import { createListing } from '$lib/holochain/listings';
   import { notifications } from '$lib/stores';
   import { validateImageFiles, MAX_PHOTOS_PER_LISTING } from '$lib/utils';
+  import { LISTING_CATEGORIES } from '$lib/config/constants';
   import type { CreateListingInput, ListingCategory } from '$types';
 
   // Form state
@@ -21,18 +22,7 @@
   let uploadingPhotos = false;
 
   // Categories for dropdown
-  const categories: ListingCategory[] = [
-    'Electronics',
-    'Fashion',
-    'Home & Garden',
-    'Sports & Outdoors',
-    'Books & Media',
-    'Toys & Games',
-    'Health & Beauty',
-    'Automotive',
-    'Art & Collectibles',
-    'Other',
-  ];
+  const categories = LISTING_CATEGORIES;
 
   /**
    * Handle file selection
@@ -208,9 +198,10 @@
       setTimeout(() => {
         goto(`/listing/${createdListing.listing_hash || createdListing.id}`);
       }, 1500);
-    } catch (e: any) {
-      console.error('Failed to create listing:', e);
-      notifications.error('Creation Failed', e.message || 'Failed to create listing');
+    } catch (err: unknown) {
+      console.error('Failed to create listing:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create listing';
+      notifications.error('Creation Failed', errorMessage);
     } finally {
       submitting = false;
     }

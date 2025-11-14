@@ -2,20 +2,46 @@
   /**
    * Photo Gallery Component
    *
-   * Displays a grid of photos from IPFS CIDs
+   * Displays a grid or carousel of photos from IPFS CIDs.
+   * Supports both grid and carousel layouts with responsive design.
+   *
+   * @component
+   * @example
+   * ```svelte
+   * <!-- Grid layout -->
+   * <PhotoGallery cids={listing.photos_ipfs_cids} layout="grid" alt="Product photo" />
+   *
+   * <!-- Carousel layout -->
+   * <PhotoGallery
+   *   cids={photos}
+   *   layout="carousel"
+   *   alt="Gallery"
+   *   maxHeight="600px"
+   * />
+   * ```
    */
 
+  import { getIpfsUrl } from '$lib/ipfs/ipfsClient';
+
+  /** Array of IPFS CIDs to display */
   export let cids: string[] = [];
+
+  /** Alt text for images (will be appended with index) */
   export let alt: string = 'Photo';
+
+  /** Layout mode - grid shows all photos, carousel shows one at a time */
   export let layout: 'grid' | 'carousel' = 'grid';
+
+  /** Maximum height for images */
   export let maxHeight: string = '400px';
 
+  /** Currently selected image index (for carousel) */
   let selectedIndex = 0;
 
-  function getIpfsUrl(cid: string): string {
-    return `https://ipfs.io/ipfs/${cid}`;
-  }
-
+  /**
+   * Select an image in carousel mode
+   * @param index - Index of image to select
+   */
   function selectImage(index: number) {
     selectedIndex = index;
   }

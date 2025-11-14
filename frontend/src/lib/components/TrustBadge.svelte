@@ -2,33 +2,74 @@
   /**
    * Trust Badge Component
    *
-   * Displays PoGQ (Proof of Generalized Quality) trust scores with:
-   * - Color-coded visual indicator
-   * - Percentage display
-   * - Optional detailed breakdown
-   * - Hover tooltip
-   * - Size variants (small, medium, large)
-   * - Optional click to view full trust profile
+   * Displays PoGQ (Proof of Generalized Quality) trust scores with color-coded
+   * visual indicators, hover tooltips, and optional detailed breakdowns.
    *
-   * Trust Score Tiers:
-   * - 90-100%: Exceptional (purple)
-   * - 75-89%: Excellent (green)
-   * - 60-74%: Good (blue)
-   * - 40-59%: Fair (yellow)
-   * - 0-39%: Poor (red)
+   * ## Features
+   * - Color-coded trust tiers (Exceptional → Poor)
+   * - Multiple size variants (small, medium, large)
+   * - Hover tooltip with detailed breakdown
+   * - Optional clickable for navigation to profiles
+   * - Automatic score normalization (supports 0-1 or 0-100)
+   * - Accessible (ARIA labels, keyboard navigation)
+   *
+   * ## Trust Score Tiers
+   * - 90-100%: Exceptional (purple) 👑
+   * - 75-89%: Excellent (green) ⭐
+   * - 60-74%: Good (blue) ✓
+   * - 40-59%: Fair (orange) ○
+   * - 0-39%: Poor (red) ⚠
+   *
+   * @component
+   * @example
+   * ```svelte
+   * <!-- Basic usage -->
+   * <TrustBadge trustScore={85} />
+   *
+   * <!-- With size and detailed breakdown -->
+   * <TrustBadge
+   *   trustScore={92}
+   *   size="large"
+   *   breakdown={{
+   *     transactionCount: 145,
+   *     positiveReviews: 138,
+   *     averageRating: 4.8,
+   *     memberSince: Date.now() - 365 * 24 * 60 * 60 * 1000
+   *   }}
+   * />
+   *
+   * <!-- Clickable for navigation -->
+   * <TrustBadge
+   *   trustScore={78}
+   *   clickable
+   *   agentId={user.agent_id}
+   *   on:click={({ detail }) => goto(`/profile/${detail.agentId}`)}
+   * />
+   * ```
    */
 
   import { createEventDispatcher } from 'svelte';
+  import { formatRelativeTime } from '$lib/utils';
 
-  // Props
-  export let trustScore: number; // 0-100 or 0-1 (auto-converted)
+  /** Trust score value (0-100 or 0-1, auto-normalized) */
+  export let trustScore: number;
+
+  /** Badge size variant */
   export let size: 'small' | 'medium' | 'large' = 'medium';
-  export let showLabel: boolean = true;
-  export let showIcon: boolean = true;
-  export let clickable: boolean = false;
-  export let agentId: string = ''; // For click navigation
 
-  // Optional detailed breakdown
+  /** Whether to show the tier label (e.g., "Excellent") */
+  export let showLabel: boolean = true;
+
+  /** Whether to show the tier icon (e.g., ⭐) */
+  export let showIcon: boolean = true;
+
+  /** Whether the badge is clickable */
+  export let clickable: boolean = false;
+
+  /** Agent ID for click navigation */
+  export let agentId: string = '';
+
+  /** Optional detailed trust score breakdown */
   export let breakdown: {
     transactionCount?: number;
     positiveReviews?: number;
@@ -113,15 +154,12 @@
   }
 
   /**
-   * Format date to relative time
+   * Format member since timestamp to relative time
+   * @param timestamp - Unix timestamp in milliseconds
+   * @returns Formatted relative time string
    */
   function formatMemberSince(timestamp: number): string {
-    const now = Date.now();
-    const diff = now - timestamp;
-    const days = Math.floor(diff / (24 * 60 * 60 * 1000));
-    if (days < 30) return `${Math.floor(days / 7)} weeks`;
-    if (days < 365) return `${Math.floor(days / 30)} months`;
-    return `${Math.floor(days / 365)} years`;
+    return formatRelativeTime(timestamp).replace(' ago', '');
   }
 </script>
 

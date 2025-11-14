@@ -2,6 +2,8 @@
   import { goto } from '$app/navigation';
   import { cartItems, itemCount, subtotal, tax, shipping, total } from '$lib/stores/cart';
   import { notifications } from '$lib/stores';
+  import { getIpfsUrl } from '$lib/ipfs/ipfsClient';
+  import { DEFAULT_TAX_RATE } from '$lib/config/constants';
 
   /**
    * Remove item from cart
@@ -59,12 +61,6 @@
     return `$${amount.toFixed(2)}`;
   }
 
-  /**
-   * Get IPFS image URL
-   */
-  function getImageUrl(cid: string): string {
-    return `https://ipfs.io/ipfs/${cid}`;
-  }
 </script>
 
 <main class="cart-page">
@@ -118,7 +114,7 @@
               <!-- Item Image -->
               <div class="item-image">
                 {#if item.photo_cid}
-                  <img src={getImageUrl(item.photo_cid)} alt={item.title} />
+                  <img src={getIpfsUrl(item.photo_cid)} alt={item.title} />
                 {:else}
                   <div class="no-image">No Image</div>
                 {/if}
@@ -213,7 +209,7 @@
           </div>
 
           <div class="summary-row">
-            <span>Tax (8%)</span>
+            <span>Tax ({(DEFAULT_TAX_RATE * 100).toFixed(0)}%)</span>
             <span>{formatCurrency($tax)}</span>
           </div>
 

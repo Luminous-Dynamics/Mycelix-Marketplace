@@ -15,7 +15,8 @@
   import { initHolochainClient } from '$lib/holochain';
   import { getAllListings, searchListings, getListingsByCategory } from '$lib/holochain/listings';
   import { notifications } from '$lib/stores';
-  import { debounce } from '$lib/utils';
+  import { debounce, formatTimestamp } from '$lib/utils';
+  import { LISTING_CATEGORIES } from '$lib/config/constants';
   import type { Listing, ListingCategory } from '$types';
 
   // Extended listing with trust score
@@ -42,16 +43,7 @@
   // Categories
   const categories: (ListingCategory | 'All Categories')[] = [
     'All Categories',
-    'Electronics',
-    'Fashion',
-    'Home & Garden',
-    'Sports & Outdoors',
-    'Books & Media',
-    'Toys & Games',
-    'Health & Beauty',
-    'Automotive',
-    'Art & Collectibles',
-    'Other',
+    ...LISTING_CATEGORIES,
   ];
 
   /**
@@ -78,8 +70,9 @@
       applyFilters();
 
       notifications.success('Listings Loaded', `Found ${allListings.length} listings`);
-    } catch (e: any) {
-      error = e.message || 'Failed to load listings';
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load listings';
+      error = errorMessage;
       notifications.error('Loading Failed', error);
     } finally {
       loading = false;
@@ -159,13 +152,6 @@
     goto(`/listing/${listing_hash}`);
   }
 
-  /**
-   * Format date
-   */
-  function formatDate(timestamp: number): string {
-    const date = new Date(timestamp);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  }
 </script>
 
 <div class="browse">
@@ -343,7 +329,7 @@
 
                 <div class="listing-meta">
                   <span class="category-tag">{listing.category}</span>
-                  <span class="date">{formatDate(listing.created_at)}</span>
+                  <span class="date">{formatTimestamp(listing.created_at, 'short')}</span>
                 </div>
 
                 <div class="listing-footer">
