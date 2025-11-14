@@ -4,6 +4,7 @@
   import { initHolochainClient } from '$lib/holochain/client';
   import { createListing } from '$lib/holochain/listings';
   import { notifications } from '$lib/stores';
+  import { validateImageFiles, MAX_PHOTOS_PER_LISTING } from '$lib/utils';
   import type { CreateListingInput, ListingCategory } from '$types';
 
   // Form state
@@ -42,8 +43,29 @@
 
     if (!files || files.length === 0) return;
 
-    // Convert FileList to array and add to existing photos
+    // Convert FileList to array
     const newFiles = Array.from(files);
+
+    // Check if adding these files would exceed the maximum
+    const totalFiles = photoFiles.length + newFiles.length;
+    if (totalFiles > MAX_PHOTOS_PER_LISTING) {
+      notifications.error(
+        'Too Many Photos',
+        `Maximum ${MAX_PHOTOS_PER_LISTING} photos allowed. You can add ${MAX_PHOTOS_PER_LISTING - photoFiles.length} more.`
+      );
+      input.value = '';
+      return;
+    }
+
+    // Validate all new files
+    const validation = validateImageFiles(newFiles);
+    if (!validation.valid) {
+      notifications.error('Invalid File', validation.error || 'Please select valid image files');
+      input.value = '';
+      return;
+    }
+
+    // Add to existing photos
     photoFiles = [...photoFiles, ...newFiles];
 
     // Generate previews
@@ -141,8 +163,8 @@
       return false;
     }
 
-    if (photoFiles.length > 10) {
-      notifications.error('Validation Error', 'Maximum 10 photos allowed');
+    if (photoFiles.length > MAX_PHOTOS_PER_LISTING) {
+      notifications.error('Validation Error', `Maximum ${MAX_PHOTOS_PER_LISTING} photos allowed`);
       return false;
     }
 

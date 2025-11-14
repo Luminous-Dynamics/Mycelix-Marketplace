@@ -58,8 +58,7 @@ export async function initHolochainClient(url: string = DEFAULT_WS_URL): Promise
       holochain.incrementAttempts();
 
       // Connect to Holochain conductor
-      // AppWebsocket.connect expects an options object or string URL
-      const client = await AppWebsocket.connect(url as any);
+      const client = await AppWebsocket.connect(url);
 
       // Get app info and cache it
       appInfoCache = await client.appInfo();
@@ -124,11 +123,11 @@ export function getCellId(roleName?: string): [Uint8Array, Uint8Array] {
  * @param payload - Function payload
  * @returns Function result
  */
-export async function callZome<T = any>(
+export async function callZome<T, P = unknown>(
   client: AppClient,
   zomeName: string,
   fnName: string,
-  payload: any
+  payload: P
 ): Promise<T> {
   const cellId = getCellId();
 

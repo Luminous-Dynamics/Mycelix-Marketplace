@@ -134,11 +134,17 @@ function createAuthStore() {
 
     /**
      * Check if token is expired
+     * Note: Prefer using the `isTokenExpired` derived store for reactive checks
      */
-    isTokenExpired: (): boolean => {
-      // Use the stored token expiry time
-      if (!initialAuthState.tokenExpiry) return true;
-      return initialAuthState.tokenExpiry < Date.now();
+    checkTokenExpiry: () => {
+      let currentState: AuthState = initialAuthState;
+      const unsubscribe = subscribe((state) => {
+        currentState = state;
+      });
+      unsubscribe();
+
+      if (!currentState.tokenExpiry) return true;
+      return currentState.tokenExpiry < Date.now();
     },
 
     /**
@@ -192,3 +198,19 @@ export const isArbitrator = derived(userRoles, ($roles) => $roles.includes('arbi
  * Derived store: is user an admin
  */
 export const isAdmin = derived(userRoles, ($roles) => $roles.includes('admin'));
+
+/**
+ * Derived store: is token expired
+ */
+export const isTokenExpired = derived(auth, ($auth) => {
+  if (!$auth.tokenExpiry) return true;
+  return $auth.tokenExpiry < Date.now();
+});
+
+/**
+ * Derived store: check if authenticated and token is valid
+ */
+export const isValidSession = derived(
+  [isAuthenticated, isTokenExpired],
+  ([$isAuthenticated, $isTokenExpired]) => $isAuthenticated && !$isTokenExpired
+);

@@ -15,6 +15,7 @@
   import { initHolochainClient } from '$lib/holochain';
   import { getAllListings, searchListings, getListingsByCategory } from '$lib/holochain/listings';
   import { notifications } from '$lib/stores';
+  import { debounce } from '$lib/utils';
   import type { Listing, ListingCategory } from '$types';
 
   // Extended listing with trust score
@@ -130,12 +131,26 @@
   }
 
   /**
+   * Debounced filter application for search (300ms delay)
+   */
+  const debouncedApplyFilters = debounce(applyFilters, 300);
+
+  /**
    * Reactive filter application
+   * Search query is debounced to improve performance
+   * Other filters apply immediately
    */
   $: if (allListings.length > 0) {
     applyFilters();
   }
-  $: searchQuery, selectedCategory, minPrice, maxPrice, sortBy, applyFilters();
+
+  // Debounce search query changes
+  $: if (searchQuery !== undefined) {
+    debouncedApplyFilters();
+  }
+
+  // Apply filters immediately for non-search changes
+  $: selectedCategory, minPrice, maxPrice, sortBy, applyFilters();
 
   /**
    * View listing details
@@ -185,12 +200,17 @@
               placeholder="Search listings..."
               bind:value={searchQuery}
               class="search-input"
+              aria-label="Search listings by title, description, or category"
             />
           </div>
 
           <!-- Category -->
           <div class="filter-group">
-            <select bind:value={selectedCategory} class="filter-select">
+            <select
+              bind:value={selectedCategory}
+              class="filter-select"
+              aria-label="Filter by category"
+            >
               {#each categories as category}
                 <option value={category}>{category}</option>
               {/each}
@@ -208,6 +228,7 @@
                 step="50"
                 bind:value={minPrice}
                 class="price-slider"
+                aria-label="Minimum price filter"
               />
             </label>
             <label>
@@ -219,13 +240,18 @@
                 step="50"
                 bind:value={maxPrice}
                 class="price-slider"
+                aria-label="Maximum price filter"
               />
             </label>
           </div>
 
           <!-- Sort -->
           <div class="filter-group">
-            <select bind:value={sortBy} class="filter-select">
+            <select
+              bind:value={sortBy}
+              class="filter-select"
+              aria-label="Sort listings"
+            >
               <option value="newest">Newest First</option>
               <option value="price-low">Price: Low to High</option>
               <option value="price-high">Price: High to Low</option>
@@ -240,15 +266,19 @@
             class="view-btn"
             class:active={viewMode === 'grid'}
             on:click={() => (viewMode = 'grid')}
+            aria-label="Switch to grid view"
+            aria-pressed={viewMode === 'grid'}
           >
-            <span>⊞</span> Grid
+            <span aria-hidden="true">⊞</span> Grid
           </button>
           <button
             class="view-btn"
             class:active={viewMode === 'list'}
             on:click={() => (viewMode = 'list')}
+            aria-label="Switch to list view"
+            aria-pressed={viewMode === 'list'}
           >
-            <span>☰</span> List
+            <span aria-hidden="true">☰</span> List
           </button>
         </div>
       </div>
@@ -264,12 +294,16 @@
           <span>🔍</span>
           <h2>No listings found</h2>
           <p>Try adjusting your filters or search query</p>
-          <button class="btn btn-secondary" on:click={() => {
-            searchQuery = '';
-            selectedCategory = 'All Categories';
-            minPrice = 0;
-            maxPrice = 10000;
-          }}>
+          <button
+            class="btn btn-secondary"
+            on:click={() => {
+              searchQuery = '';
+              selectedCategory = 'All Categories';
+              minPrice = 0;
+              maxPrice = 10000;
+            }}
+            aria-label="Clear all filters and show all listings"
+          >
             Clear Filters
           </button>
         </div>
