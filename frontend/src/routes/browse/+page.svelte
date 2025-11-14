@@ -17,6 +17,8 @@
   import { notifications } from '$lib/stores';
   import { debounce, formatTimestamp } from '$lib/utils';
   import { LISTING_CATEGORIES } from '$lib/config/constants';
+  import ErrorState from '$lib/components/ErrorState.svelte';
+  import EmptyState from '$lib/components/EmptyState.svelte';
   import type { Listing, ListingCategory } from '$types';
 
   // Extended listing with trust score
@@ -169,12 +171,11 @@
       </div>
     {:else if error}
       <!-- Error State -->
-      <div class="error-state">
-        <span class="error-icon">⚠️</span>
-        <h2>Failed to Load Listings</h2>
-        <p>{error}</p>
-        <button class="btn btn-primary" on:click={loadListings}>Retry</button>
-      </div>
+      <ErrorState
+        title="Failed to Load Listings"
+        message={error}
+        on:retry={loadListings}
+      />
     {:else}
       <!-- Filters and Controls -->
       <div class="controls-section">
@@ -276,23 +277,20 @@
 
       <!-- Listings Grid/List -->
       {#if filteredListings.length === 0}
-        <div class="empty-state">
-          <span>🔍</span>
-          <h2>No listings found</h2>
-          <p>Try adjusting your filters or search query</p>
-          <button
-            class="btn btn-secondary"
-            on:click={() => {
-              searchQuery = '';
-              selectedCategory = 'All Categories';
-              minPrice = 0;
-              maxPrice = 10000;
-            }}
-            aria-label="Clear all filters and show all listings"
-          >
-            Clear Filters
-          </button>
-        </div>
+        <EmptyState
+          icon="🔍"
+          title="No listings found"
+          message="Try adjusting your filters or search query"
+          showAction={true}
+          actionText="Clear Filters"
+          actionVariant="secondary"
+          on:action={() => {
+            searchQuery = '';
+            selectedCategory = 'All Categories';
+            minPrice = 0;
+            maxPrice = 10000;
+          }}
+        />
       {:else}
         <div class={`listings-container ${viewMode}`}>
           {#each filteredListings as listing}
