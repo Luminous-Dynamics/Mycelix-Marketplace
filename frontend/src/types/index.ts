@@ -63,3 +63,22 @@ export type {
   AddToCartInput,
   UpdateCartItemInput,
 } from './cart';
+
+// API types
+export type {
+  ApiError,
+  HolochainApiError,
+  ValidationApiError,
+  NetworkApiError,
+  ApiResponse,
+  PaginatedApiResponse,
+  PaginationParams,
+  SortParams,
+  FilterParams,
+  SearchParams,
+  ApiCallStatus,
+  ApiCallState,
+} from '../lib/types/api';
+
+// Type guards
+export * from '../lib/types/guards';
