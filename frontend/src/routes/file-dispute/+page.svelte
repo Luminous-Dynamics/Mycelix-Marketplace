@@ -6,6 +6,7 @@
   import { createDispute } from '$lib/holochain/disputes';
   import { notifications } from '$lib/stores';
   import Button from '$lib/components/Button.svelte';
+  import PhotoUploader from '$lib/components/PhotoUploader.svelte';
   import type { CreateDisputeInput, DisputeReason } from '$types';
 
   // URL parameters
@@ -17,7 +18,6 @@
   let reason: DisputeReason = 'not_as_described';
   let description = '';
   let evidenceFiles: File[] = [];
-  let evidencePreviews: string[] = [];
 
   // UI state
   let submitting = false;
@@ -51,37 +51,17 @@
   });
 
   /**
-   * Handle file selection
+   * Handle evidence change from PhotoUploader
    */
-  function handleFileSelect(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const files = input.files;
-
-    if (!files || files.length === 0) return;
-
-    // Convert FileList to array and add to existing evidence
-    const newFiles = Array.from(files);
-    evidenceFiles = [...evidenceFiles, ...newFiles];
-
-    // Generate previews
-    newFiles.forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        evidencePreviews = [...evidencePreviews, e.target?.result as string];
-      };
-      reader.readAsDataURL(file);
-    });
-
-    // Reset input
-    input.value = '';
+  function handleEvidenceChange(event: CustomEvent<{ photos: File[] }>) {
+    evidenceFiles = event.detail.photos;
   }
 
   /**
-   * Remove evidence at index
+   * Handle evidence upload error
    */
-  function removeEvidence(index: number) {
-    evidenceFiles = evidenceFiles.filter((_, i) => i !== index);
-    evidencePreviews = evidencePreviews.filter((_, i) => i !== index);
+  function handleEvidenceError(event: CustomEvent<{ message: string; file?: File }>) {
+    notifications.error('Evidence Upload Error', event.detail.message);
   }
 
   /**
@@ -249,65 +229,18 @@
 
       <!-- Evidence Upload -->
       <div class="form-group">
-        <label for="evidence-input">Supporting Evidence</label>
-
-        <!-- Evidence Upload Button -->
-        <div class="evidence-upload-area">
-          <input
-            id="evidence-input"
-            type="file"
-            accept="image/*,application/pdf"
-            multiple
-            on:change={handleFileSelect}
-            style="display: none;"
-          />
-          <button
-            type="button"
-            class="btn btn-upload"
-            on:click={() => document.getElementById('evidence-input')?.click()}
-            disabled={evidenceFiles.length >= 10}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="17 8 12 3 7 8" />
-              <line x1="12" y1="3" x2="12" y2="15" />
-            </svg>
-            Upload Evidence ({evidenceFiles.length}/10)
-          </button>
-        </div>
-
-        <!-- Evidence Previews -->
-        {#if evidencePreviews.length > 0}
-          <div class="evidence-preview-grid">
-            {#each evidencePreviews as preview, i}
-              <div class="evidence-preview-item">
-                <img src={preview} alt="Evidence {i + 1}" />
-                <button
-                  type="button"
-                  class="remove-evidence-btn"
-                  on:click={() => removeEvidence(i)}
-                  title="Remove evidence"
-                >
-                  ×
-                </button>
-              </div>
-            {/each}
-          </div>
-        {/if}
-
+        <label>Supporting Evidence (Optional)</label>
+        <PhotoUploader
+          bind:photos={evidenceFiles}
+          maxPhotos={10}
+          uploading={uploadingEvidence}
+          disabled={submitting}
+          on:photosChange={handleEvidenceChange}
+          on:error={handleEvidenceError}
+        />
         <small class="help-text">
           Upload photos showing the issue, screenshots of communication, or any other relevant
-          documents. Maximum 10 files.
+          documents to support your claim.
         </small>
       </div>
 
@@ -468,84 +401,6 @@
     font-size: 0.875rem;
   }
 
-  /* Evidence Upload */
-  .evidence-upload-area {
-    display: flex;
-    justify-content: center;
-    padding: 1rem;
-    border: 2px dashed #cbd5e0;
-    border-radius: 8px;
-    background: #f7fafc;
-  }
-
-  .btn-upload {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    background: white;
-    border: 2px solid #e53e3e;
-    color: #e53e3e;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .btn-upload:hover:not(:disabled) {
-    background: #e53e3e;
-    color: white;
-  }
-
-  .btn-upload:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .evidence-preview-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
-  }
-
-  .evidence-preview-item {
-    position: relative;
-    aspect-ratio: 1;
-    border-radius: 8px;
-    overflow: hidden;
-    border: 2px solid #e2e8f0;
-  }
-
-  .evidence-preview-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .remove-evidence-btn {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-    border: none;
-    font-size: 1.5rem;
-    line-height: 1;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s;
-  }
-
-  .remove-evidence-btn:hover {
-    background: rgba(229, 62, 62, 0.9);
-  }
-
   /* Guidelines */
   .guidelines {
     background: #fffaf0;
@@ -587,10 +442,6 @@
   @media (max-width: 768px) {
     .container {
       padding: 1.5rem;
-    }
-
-    .evidence-preview-grid {
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     }
 
     .form-actions {

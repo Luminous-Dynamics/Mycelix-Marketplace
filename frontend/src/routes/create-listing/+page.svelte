@@ -7,6 +7,7 @@
   import { validateImageFiles, MAX_PHOTOS_PER_LISTING } from '$lib/utils';
   import { LISTING_CATEGORIES } from '$lib/config/constants';
   import Button from '$lib/components/Button.svelte';
+  import PhotoUploader from '$lib/components/PhotoUploader.svelte';
   import type { CreateListingInput, ListingCategory } from '$types';
 
   // Form state
@@ -16,7 +17,6 @@
   let category: ListingCategory = 'Other';
   let quantityAvailable = 1;
   let photoFiles: File[] = [];
-  let photoPreviews: string[] = [];
 
   // UI state
   let submitting = false;
@@ -26,58 +26,17 @@
   const categories = LISTING_CATEGORIES;
 
   /**
-   * Handle file selection
+   * Handle photos change from PhotoUploader
    */
-  function handleFileSelect(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const files = input.files;
-
-    if (!files || files.length === 0) return;
-
-    // Convert FileList to array
-    const newFiles = Array.from(files);
-
-    // Check if adding these files would exceed the maximum
-    const totalFiles = photoFiles.length + newFiles.length;
-    if (totalFiles > MAX_PHOTOS_PER_LISTING) {
-      notifications.error(
-        'Too Many Photos',
-        `Maximum ${MAX_PHOTOS_PER_LISTING} photos allowed. You can add ${MAX_PHOTOS_PER_LISTING - photoFiles.length} more.`
-      );
-      input.value = '';
-      return;
-    }
-
-    // Validate all new files
-    const validation = validateImageFiles(newFiles);
-    if (!validation.valid) {
-      notifications.error('Invalid File', validation.error || 'Please select valid image files');
-      input.value = '';
-      return;
-    }
-
-    // Add to existing photos
-    photoFiles = [...photoFiles, ...newFiles];
-
-    // Generate previews
-    newFiles.forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        photoPreviews = [...photoPreviews, e.target?.result as string];
-      };
-      reader.readAsDataURL(file);
-    });
-
-    // Reset input
-    input.value = '';
+  function handlePhotosChange(event: CustomEvent<{ photos: File[] }>) {
+    photoFiles = event.detail.photos;
   }
 
   /**
-   * Remove photo at index
+   * Handle photo upload error
    */
-  function removePhoto(index: number) {
-    photoFiles = photoFiles.filter((_, i) => i !== index);
-    photoPreviews = photoPreviews.filter((_, i) => i !== index);
+  function handlePhotoError(event: CustomEvent<{ message: string; file?: File }>) {
+    notifications.error('Photo Upload Error', event.detail.message);
   }
 
   /**
@@ -313,70 +272,17 @@
 
       <!-- Photos -->
       <div class="form-group">
-        <label for="photos-input">
+        <label>
           Photos <span class="required">*</span>
         </label>
-
-        <!-- Photo Upload Button -->
-        <div class="photo-upload-area">
-          <input
-            id="photos-input"
-            type="file"
-            accept="image/*"
-            multiple
-            on:change={handleFileSelect}
-            style="display: none;"
-          />
-          <button
-            type="button"
-            class="btn btn-upload"
-            on:click={() => document.getElementById('photos-input')?.click()}
-            disabled={photoFiles.length >= 10}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="17 8 12 3 7 8" />
-              <line x1="12" y1="3" x2="12" y2="15" />
-            </svg>
-            Upload Photos ({photoFiles.length}/10)
-          </button>
-        </div>
-
-        <!-- Photo Previews -->
-        {#if photoPreviews.length > 0}
-          <div class="photo-preview-grid">
-            {#each photoPreviews as preview, i}
-              <div class="photo-preview-item">
-                <img src={preview} alt="Preview {i + 1}" />
-                <button
-                  type="button"
-                  class="remove-photo-btn"
-                  on:click={() => removePhoto(i)}
-                  title="Remove photo"
-                >
-                  ×
-                </button>
-                {#if i === 0}
-                  <span class="main-photo-badge">Main</span>
-                {/if}
-              </div>
-            {/each}
-          </div>
-        {/if}
-
-        <small class="help-text">
-          First photo will be the main listing image. Maximum 10 photos.
-        </small>
+        <PhotoUploader
+          bind:photos={photoFiles}
+          maxPhotos={MAX_PHOTOS_PER_LISTING}
+          uploading={uploadingPhotos}
+          disabled={submitting}
+          on:photosChange={handlePhotosChange}
+          on:error={handlePhotoError}
+        />
       </div>
 
       <!-- Form Actions -->
@@ -505,96 +411,6 @@
     font-size: 0.875rem;
   }
 
-  /* Photo Upload */
-  .photo-upload-area {
-    display: flex;
-    justify-content: center;
-    padding: 1rem;
-    border: 2px dashed #cbd5e0;
-    border-radius: 8px;
-    background: #f7fafc;
-  }
-
-  .btn-upload {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    background: white;
-    border: 2px solid #667eea;
-    color: #667eea;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .btn-upload:hover:not(:disabled) {
-    background: #667eea;
-    color: white;
-  }
-
-  .btn-upload:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .photo-preview-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
-  }
-
-  .photo-preview-item {
-    position: relative;
-    aspect-ratio: 1;
-    border-radius: 8px;
-    overflow: hidden;
-    border: 2px solid #e2e8f0;
-  }
-
-  .photo-preview-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .remove-photo-btn {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-    border: none;
-    font-size: 1.5rem;
-    line-height: 1;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s;
-  }
-
-  .remove-photo-btn:hover {
-    background: rgba(229, 62, 62, 0.9);
-  }
-
-  .main-photo-badge {
-    position: absolute;
-    bottom: 0.5rem;
-    left: 0.5rem;
-    background: rgba(102, 126, 234, 0.9);
-    color: white;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 600;
-  }
-
   /* Form Actions */
   .form-actions {
     display: flex;
@@ -613,10 +429,6 @@
     .form-row {
       grid-template-columns: 1fr;
       gap: 1rem;
-    }
-
-    .photo-preview-grid {
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     }
 
     .form-actions {
