@@ -23,6 +23,7 @@
   import EmptyState from '$lib/components/EmptyState.svelte';
   import LoadingState from '$lib/components/LoadingState.svelte';
   import StatusBadge from '$lib/components/StatusBadge.svelte';
+  import Button from '$lib/components/Button.svelte';
   import type { UserProfile, Listing, Transaction } from '$types';
 
   // State
@@ -119,12 +120,12 @@
         </div>
 
         <div class="quick-actions">
-          <button class="btn btn-primary" on:click={() => goto('/create-listing')}>
+          <Button variant="primary" on:click={() => goto('/create-listing')}>
             + Create Listing
-          </button>
-          <button class="btn btn-secondary" on:click={() => goto('/browse')}>
+          </Button>
+          <Button variant="secondary" on:click={() => goto('/browse')}>
             Browse Marketplace
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -158,9 +159,9 @@
         <div class="card">
           <div class="card-header">
             <h2>Recent Transactions</h2>
-            <button class="link-button" on:click={() => goto('/transactions')}>
+            <Button variant="link" size="sm" on:click={() => goto('/transactions')}>
               View All →
-            </button>
+            </Button>
           </div>
           {#if recentTransactions.length === 0}
             <EmptyState
@@ -205,9 +206,9 @@
         <div class="card">
           <div class="card-header">
             <h2>Active Listings</h2>
-            <button class="link-button" on:click={() => goto('/my-listings')}>
+            <Button variant="link" size="sm" on:click={() => goto('/my-listings')}>
               Manage All →
-            </button>
+            </Button>
           </div>
           {#if activeListings.length === 0}
             <EmptyState
@@ -477,19 +478,6 @@
     color: #2d3748;
   }
 
-  .link-button {
-    background: none;
-    border: none;
-    color: #4299e1;
-    font-size: 0.875rem;
-    cursor: pointer;
-    transition: color 0.2s;
-  }
-
-  .link-button:hover {
-    color: #2b6cb0;
-  }
-
   /* Empty State */
   .empty-state {
     display: flex;
@@ -645,37 +633,6 @@
   .listing-meta {
     font-size: 0.875rem;
     color: #718096;
-  }
-
-  /* Buttons */
-  .btn {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 0.375rem;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-decoration: none;
-    display: inline-block;
-  }
-
-  .btn-primary {
-    background: #4299e1;
-    color: white;
-  }
-
-  .btn-primary:hover {
-    background: #3182ce;
-  }
-
-  .btn-secondary {
-    background: #e2e8f0;
-    color: #2d3748;
-  }
-
-  .btn-secondary:hover {
-    background: #cbd5e0;
   }
 
   /* Responsive */

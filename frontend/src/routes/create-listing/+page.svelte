@@ -6,6 +6,7 @@
   import { notifications } from '$lib/stores';
   import { validateImageFiles, MAX_PHOTOS_PER_LISTING } from '$lib/utils';
   import { LISTING_CATEGORIES } from '$lib/config/constants';
+  import Button from '$lib/components/Button.svelte';
   import type { CreateListingInput, ListingCategory } from '$types';
 
   // Form state
@@ -380,18 +381,16 @@
 
       <!-- Form Actions -->
       <div class="form-actions">
-        <button type="button" class="btn btn-secondary" on:click={handleCancel} disabled={submitting}>
+        <Button variant="secondary" type="button" on:click={handleCancel} disabled={submitting}>
           Cancel
-        </button>
-        <button type="submit" class="btn btn-primary" disabled={submitting || uploadingPhotos}>
-          {#if submitting}
-            Creating Listing...
-          {:else if uploadingPhotos}
+        </Button>
+        <Button variant="primary" type="submit" loading={submitting || uploadingPhotos} disabled={submitting || uploadingPhotos}>
+          {#if uploadingPhotos}
             Uploading Photos...
           {:else}
             Create Listing
           {/if}
-        </button>
+        </Button>
       </div>
     </form>
   </div>
@@ -603,41 +602,6 @@
     justify-content: flex-end;
     padding-top: 1rem;
     border-top: 2px solid #e2e8f0;
-  }
-
-  .btn {
-    padding: 0.75rem 2rem;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: none;
-  }
-
-  .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-  }
-
-  .btn-primary:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-  }
-
-  .btn-secondary {
-    background: white;
-    color: #2d3748;
-    border: 2px solid #e2e8f0;
-  }
-
-  .btn-secondary:hover:not(:disabled) {
-    background: #f7fafc;
-  }
-
-  .btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
   }
 
   /* Responsive */
