@@ -19,6 +19,7 @@
   import { cartItems } from '$lib/stores/cart';
   import { notifications } from '$lib/stores';
   import { handleError } from '$lib/utils/errors';
+  import LoadingState from '$lib/components/LoadingState.svelte';
   import type { ListingWithContext, Review, SellerInfo, CreateTransactionInput } from '$types';
 
   // Route parameter
@@ -151,11 +152,7 @@
 <div class="listing-detail">
   <div class="container">
     {#if loading}
-      <!-- Loading State -->
-      <div class="loading-state">
-        <div class="spinner"></div>
-        <p>Loading listing...</p>
-      </div>
+      <LoadingState message="Loading listing..." />
     {:else if error || !listing}
       <!-- Error State -->
       <div class="error-state">

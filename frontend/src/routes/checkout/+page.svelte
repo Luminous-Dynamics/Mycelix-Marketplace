@@ -29,6 +29,7 @@
   import { createTransaction } from '$lib/holochain/transactions';
   import { handleError } from '$lib/utils/errors';
   import EmptyState from '$lib/components/EmptyState.svelte';
+  import LoadingState from '$lib/components/LoadingState.svelte';
   import type { CartItem, PaymentMethod, CreateTransactionInput } from '$types';
 
   // Cart state (from store)
@@ -253,11 +254,7 @@
 <div class="checkout-page">
   <div class="container">
     {#if loading}
-      <!-- Loading State -->
-      <div class="loading-state">
-        <div class="spinner"></div>
-        <p>Loading checkout...</p>
-      </div>
+      <LoadingState message="Loading checkout..." />
     {:else if error && cartItemsList.length === 0}
       <!-- Empty Cart -->
       <EmptyState

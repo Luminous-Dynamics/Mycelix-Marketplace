@@ -31,6 +31,7 @@
   import { handleError } from '$lib/utils/errors';
   import ErrorState from '$lib/components/ErrorState.svelte';
   import EmptyState from '$lib/components/EmptyState.svelte';
+  import LoadingState from '$lib/components/LoadingState.svelte';
   import type { Dispute, ArbitratorProfile, CastVoteInput} from '$types';
 
   // Arbitrator state
@@ -229,11 +230,7 @@
 <div class="mrc-arbitration">
   <div class="container">
     {#if loading}
-      <!-- Loading State -->
-      <div class="loading-state">
-        <div class="spinner"></div>
-        <p>Loading arbitration interface...</p>
-      </div>
+      <LoadingState message="Loading arbitration interface..." />
     {:else if error || !isArbitrator}
       <!-- Error / Not Authorized -->
       <ErrorState

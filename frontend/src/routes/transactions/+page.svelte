@@ -28,6 +28,7 @@
   import { handleError } from '$lib/utils/errors';
   import ErrorState from '$lib/components/ErrorState.svelte';
   import EmptyState from '$lib/components/EmptyState.svelte';
+  import LoadingState from '$lib/components/LoadingState.svelte';
   import StatusBadge from '$lib/components/StatusBadge.svelte';
   import type { Transaction, TransactionStatus } from '$types';
 
@@ -265,11 +266,7 @@
 <div class="transactions-page">
   <div class="container">
     {#if loading}
-      <!-- Loading State -->
-      <div class="loading-state">
-        <div class="spinner"></div>
-        <p>Loading transactions...</p>
-      </div>
+      <LoadingState message="Loading transactions..." />
     {:else if error}
       <!-- Error State -->
       <ErrorState

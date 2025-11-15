@@ -21,6 +21,7 @@
   import { formatRelativeTime } from '$lib/utils/format';
   import ErrorState from '$lib/components/ErrorState.svelte';
   import EmptyState from '$lib/components/EmptyState.svelte';
+  import LoadingState from '$lib/components/LoadingState.svelte';
   import StatusBadge from '$lib/components/StatusBadge.svelte';
   import type { UserProfile, Listing, Transaction } from '$types';
 
@@ -80,11 +81,7 @@
 <div class="dashboard">
   <div class="container">
     {#if loading}
-      <!-- Loading State -->
-      <div class="loading-state">
-        <div class="spinner"></div>
-        <p>Loading dashboard...</p>
-      </div>
+      <LoadingState message="Loading dashboard..." />
     {:else if error}
       <!-- Error State -->
       <ErrorState

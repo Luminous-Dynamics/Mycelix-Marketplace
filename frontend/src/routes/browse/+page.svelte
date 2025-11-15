@@ -19,6 +19,7 @@
   import { LISTING_CATEGORIES } from '$lib/config/constants';
   import ErrorState from '$lib/components/ErrorState.svelte';
   import EmptyState from '$lib/components/EmptyState.svelte';
+  import LoadingState from '$lib/components/LoadingState.svelte';
   import type { Listing, ListingCategory } from '$types';
 
   // Extended listing with trust score
@@ -164,11 +165,7 @@
     </div>
 
     {#if loading}
-      <!-- Loading State -->
-      <div class="loading-state">
-        <div class="spinner"></div>
-        <p>Loading listings...</p>
-      </div>
+      <LoadingState message="Loading listings..." />
     {:else if error}
       <!-- Error State -->
       <ErrorState
