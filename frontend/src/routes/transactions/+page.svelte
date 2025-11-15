@@ -26,6 +26,8 @@
   import { notifications } from '$lib/stores';
   import { currentUser } from '$lib/stores/auth';
   import { handleError } from '$lib/utils/errors';
+  import ErrorState from '$lib/components/ErrorState.svelte';
+  import EmptyState from '$lib/components/EmptyState.svelte';
   import type { Transaction, TransactionStatus } from '$types';
 
   // Extended transaction type with UI-specific fields
@@ -290,10 +292,11 @@
       </div>
     {:else if error}
       <!-- Error State -->
-      <div class="error-state">
-        <span class="error-icon">⚠️</span>
-        <p>{error}</p>
-      </div>
+      <ErrorState
+        title="Failed to Load Transactions"
+        message={error}
+        on:retry={() => window.location.reload()}
+      />
     {:else}
       <!-- Page Header -->
       <div class="page-header">
@@ -332,11 +335,14 @@
 
       <!-- Transactions List -->
       {#if filteredTransactions.length === 0}
-        <div class="empty-state">
-          <span>📦</span>
-          <p>No transactions found</p>
-          <a href="/browse" class="btn btn-primary">Browse Marketplace</a>
-        </div>
+        <EmptyState
+          icon="📦"
+          title="No transactions found"
+          message="Start shopping to see your purchase and sales history"
+          showAction={true}
+          actionText="Browse Marketplace"
+          on:action={() => goto('/browse')}
+        />
       {:else}
         <div class="transactions-list">
           {#each filteredTransactions as transaction}

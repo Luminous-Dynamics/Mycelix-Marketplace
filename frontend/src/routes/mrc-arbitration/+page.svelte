@@ -29,7 +29,9 @@
   } from '$lib/holochain/disputes';
   import { notifications } from '$lib/stores';
   import { handleError } from '$lib/utils/errors';
-  import type { Dispute, ArbitratorProfile, CastVoteInput } from '$types';
+  import ErrorState from '$lib/components/ErrorState.svelte';
+  import EmptyState from '$lib/components/EmptyState.svelte';
+  import type { Dispute, ArbitratorProfile, CastVoteInput} from '$types';
 
   // Arbitrator state
   let isArbitrator = false;
@@ -234,12 +236,15 @@
       </div>
     {:else if error || !isArbitrator}
       <!-- Error / Not Authorized -->
-      <div class="error-state">
-        <span class="error-icon">⚠️</span>
-        <h2>Access Denied</h2>
-        <p>{error || 'You are not authorized as an MRC arbitrator'}</p>
-        <a href="/dashboard" class="btn btn-secondary">Return to Dashboard</a>
-      </div>
+      <ErrorState
+        icon="🔒"
+        title="Access Denied"
+        message={error || 'You are not authorized as an MRC arbitrator'}
+        showAction={true}
+        actionText="Return to Dashboard"
+        actionVariant="secondary"
+        on:action={() => goto('/dashboard')}
+      />
     {:else}
       <!-- Arbitrator Dashboard -->
       <div class="arbitrator-header">
@@ -311,10 +316,11 @@
         {#if activeTab === 'pending'}
           <!-- Pending Disputes -->
           {#if pendingDisputes.length === 0}
-            <div class="empty-state">
-              <span>⚖️</span>
-              <p>No pending disputes</p>
-            </div>
+            <EmptyState
+              icon="⚖️"
+              title="No pending disputes"
+              compact={true}
+            />
           {:else}
             <div class="disputes-grid">
               {#each pendingDisputes as dispute}
@@ -351,10 +357,11 @@
         {:else if activeTab === 'active'}
           <!-- Active Disputes -->
           {#if activeDisputes.length === 0}
-            <div class="empty-state">
-              <span>⚖️</span>
-              <p>No disputes under review</p>
-            </div>
+            <EmptyState
+              icon="⚖️"
+              title="No disputes under review"
+              compact={true}
+            />
           {:else}
             <div class="disputes-grid">
               {#each activeDisputes as dispute}
@@ -407,10 +414,11 @@
         {:else if activeTab === 'resolved'}
           <!-- Resolved Disputes -->
           {#if resolvedDisputes.length === 0}
-            <div class="empty-state">
-              <span>✅</span>
-              <p>No resolved disputes</p>
-            </div>
+            <EmptyState
+              icon="✅"
+              title="No resolved disputes"
+              compact={true}
+            />
           {:else}
             <div class="disputes-grid">
               {#each resolvedDisputes as dispute}

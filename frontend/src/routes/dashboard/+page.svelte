@@ -19,6 +19,8 @@
   import { notifications } from '$lib/stores';
   import { handleError } from '$lib/utils/errors';
   import { formatRelativeTime } from '$lib/utils/format';
+  import ErrorState from '$lib/components/ErrorState.svelte';
+  import EmptyState from '$lib/components/EmptyState.svelte';
   import type { UserProfile, Listing, Transaction } from '$types';
 
   // State
@@ -84,14 +86,11 @@
       </div>
     {:else if error}
       <!-- Error State -->
-      <div class="error-state">
-        <span class="error-icon">⚠️</span>
-        <h2>Failed to Load Dashboard</h2>
-        <p>{error}</p>
-        <button class="btn btn-primary" on:click={() => window.location.reload()}>
-          Retry
-        </button>
-      </div>
+      <ErrorState
+        title="Failed to Load Dashboard"
+        message={error}
+        on:retry={() => window.location.reload()}
+      />
     {:else if profile}
       <!-- Dashboard Content -->
       <div class="dashboard-header">
@@ -166,13 +165,16 @@
             </button>
           </div>
           {#if recentTransactions.length === 0}
-            <div class="empty-state">
-              <span>📭</span>
-              <p>No transactions yet</p>
-              <button class="btn btn-secondary" on:click={() => goto('/browse')}>
-                Start Shopping
-              </button>
-            </div>
+            <EmptyState
+              icon="📭"
+              title="No transactions yet"
+              message="Start shopping to see your purchase and sales history here"
+              showAction={true}
+              actionText="Start Shopping"
+              actionVariant="secondary"
+              compact={true}
+              on:action={() => goto('/browse')}
+            />
           {:else}
             <div class="transaction-list">
               {#each recentTransactions as tx}
@@ -210,13 +212,15 @@
             </button>
           </div>
           {#if activeListings.length === 0}
-            <div class="empty-state">
-              <span>📦</span>
-              <p>No active listings</p>
-              <button class="btn btn-primary" on:click={() => goto('/create-listing')}>
-                Create Listing
-              </button>
-            </div>
+            <EmptyState
+              icon="📦"
+              title="No active listings"
+              message="Create your first listing to start selling"
+              showAction={true}
+              actionText="Create Listing"
+              compact={true}
+              on:action={() => goto('/create-listing')}
+            />
           {:else}
             <div class="listing-list">
               {#each activeListings as listing}

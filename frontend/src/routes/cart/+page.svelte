@@ -5,6 +5,7 @@
   import { getIpfsUrl } from '$lib/ipfs/ipfsClient';
   import { DEFAULT_TAX_RATE } from '$lib/config/constants';
   import { formatPrice } from '$lib/utils/format';
+  import EmptyState from '$lib/components/EmptyState.svelte';
 
   /**
    * Remove item from cart
@@ -75,9 +76,15 @@
 
     {#if $cartItems.length === 0}
       <!-- Empty Cart State -->
-      <div class="empty-cart">
+      <EmptyState
+        title="Your cart is empty"
+        message="Add some items to get started!"
+        showAction={true}
+        actionText="Browse Marketplace"
+        on:action={continueShopping}
+      >
         <svg
-          class="empty-cart-icon"
+          slot="icon"
           xmlns="http://www.w3.org/2000/svg"
           width="120"
           height="120"
@@ -92,12 +99,7 @@
           <circle cx="20" cy="21" r="1" />
           <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
         </svg>
-
-        <h2>Your cart is empty</h2>
-        <p>Add some items to get started!</p>
-
-        <button class="btn btn-primary" on:click={continueShopping}>Browse Marketplace</button>
-      </div>
+      </EmptyState>
     {:else}
       <!-- Cart Content -->
       <div class="cart-content">

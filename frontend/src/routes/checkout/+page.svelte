@@ -28,6 +28,7 @@
   import { initHolochainClient } from '$lib/holochain';
   import { createTransaction } from '$lib/holochain/transactions';
   import { handleError } from '$lib/utils/errors';
+  import EmptyState from '$lib/components/EmptyState.svelte';
   import type { CartItem, PaymentMethod, CreateTransactionInput } from '$types';
 
   // Cart state (from store)
@@ -259,12 +260,14 @@
       </div>
     {:else if error && cartItemsList.length === 0}
       <!-- Empty Cart -->
-      <div class="error-state">
-        <span class="error-icon">🛒</span>
-        <h2>Your cart is empty</h2>
-        <p>Add some items before checking out</p>
-        <a href="/browse" class="btn btn-primary">Browse Marketplace</a>
-      </div>
+      <EmptyState
+        icon="🛒"
+        title="Your cart is empty"
+        message="Add some items before checking out"
+        showAction={true}
+        actionText="Browse Marketplace"
+        on:action={() => goto('/browse')}
+      />
     {:else if checkoutSuccess}
       <!-- Success State -->
       <div class="success-state">
