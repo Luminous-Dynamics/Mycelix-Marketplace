@@ -31,6 +31,7 @@
   import LoadingState from '$lib/components/LoadingState.svelte';
   import StatusBadge from '$lib/components/StatusBadge.svelte';
   import Button from '$lib/components/Button.svelte';
+  import TransactionCard from '$lib/components/TransactionCard.svelte';
   import type { Transaction, TransactionStatus } from '$types';
 
   // Extended transaction type with UI-specific fields
@@ -324,63 +325,13 @@
       {:else}
         <div class="transactions-list">
           {#each filteredTransactions as transaction}
-            <button
-              class="transaction-card"
-              class:selected={selectedTransaction?.transaction_hash ===
-                transaction.transaction_hash}
+            <TransactionCard
+              {transaction}
+              variant="full"
+              userRole={transaction.type === 'purchase' ? 'buyer' : 'seller'}
               on:click={() => selectTransaction(transaction)}
-              on:keydown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  selectTransaction(transaction);
-                }
-              }}
-              aria-label="View transaction {transaction.id.slice(0, 8)}"
-            >
-              <!-- Transaction Header -->
-              <div class="transaction-header">
-                <div class="transaction-type">
-                  {#if transaction.type === 'purchase'}
-                    <span class="type-badge type-purchase">Purchase</span>
-                  {:else}
-                    <span class="type-badge type-sale">Sale</span>
-                  {/if}
-                </div>
-
-                <StatusBadge status={transaction.status} type="transaction" size="sm" />
-              </div>
-
-              <!-- Transaction Content -->
-              <div class="transaction-content">
-                <div class="transaction-thumbnail">
-                  {#if transaction.listing_photo_cid}
-                    <img
-                      src={getIpfsUrl(transaction.listing_photo_cid)}
-                      alt={transaction.listing_title}
-                    />
-                  {:else}
-                    <div class="no-image">📷</div>
-                  {/if}
-                </div>
-
-                <div class="transaction-info">
-                  <h3>{transaction.listing_title}</h3>
-                  <p class="transaction-date">{formatDate(transaction.created_at)}</p>
-
-                  {#if transaction.type === 'purchase'}
-                    <p class="transaction-party">
-                      Seller: <strong>{transaction.seller_name}</strong>
-                    </p>
-                  {:else}
-                    <p class="transaction-party">
-                      Buyer: <strong>{transaction.buyer_name}</strong>
-                    </p>
-                  {/if}
-
-                  <p class="transaction-price">${transaction.total_price.toFixed(2)}</p>
-                </div>
-              </div>
-            </button>
+              on:viewDetails={() => selectTransaction(transaction)}
+            />
           {/each}
         </div>
       {/if}
@@ -739,133 +690,6 @@
   .transactions-list {
     display: grid;
     gap: 1rem;
-  }
-
-  .transaction-card {
-    background: white;
-    border: 2px solid #e2e8f0;
-    border-radius: 0.5rem;
-    padding: 1.5rem;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .transaction-card:hover {
-    border-color: #4299e1;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-
-  .transaction-card.selected {
-    border-color: #4299e1;
-    background: #ebf8ff;
-  }
-
-  .transaction-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-  }
-
-  .type-badge {
-    padding: 0.25rem 0.75rem;
-    border-radius: 0.25rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-  }
-
-  .type-purchase {
-    background: #e6f2ff;
-    color: #2c5282;
-  }
-
-  .type-sale {
-    background: #f0fff4;
-    color: #276749;
-  }
-
-  .status-badge {
-    padding: 0.25rem 0.75rem;
-    border-radius: 0.25rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-  }
-
-  .status-warning {
-    background: #feebc8;
-    color: #7c2d12;
-  }
-
-  .status-info {
-    background: #bee3f8;
-    color: #2c5282;
-  }
-
-  .status-success {
-    background: #c6f6d5;
-    color: #22543d;
-  }
-
-  .status-error {
-    background: #fed7d7;
-    color: #742a2a;
-  }
-
-  .transaction-content {
-    display: grid;
-    grid-template-columns: 80px 1fr;
-    gap: 1rem;
-  }
-
-  .transaction-thumbnail {
-    width: 80px;
-    height: 80px;
-    border-radius: 0.375rem;
-    overflow: hidden;
-    background: #f7fafc;
-  }
-
-  .transaction-thumbnail img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .no-image {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #cbd5e0;
-    font-size: 2rem;
-  }
-
-  .transaction-info h3 {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: #2d3748;
-    margin-bottom: 0.5rem;
-  }
-
-  .transaction-date {
-    font-size: 0.875rem;
-    color: #a0aec0;
-    margin-bottom: 0.5rem;
-  }
-
-  .transaction-party {
-    font-size: 0.875rem;
-    color: #4a5568;
-    margin-bottom: 0.5rem;
-  }
-
-  .transaction-price {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #38a169;
   }
 
   /* Transaction Modal */
