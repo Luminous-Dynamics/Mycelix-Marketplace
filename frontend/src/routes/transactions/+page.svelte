@@ -30,6 +30,7 @@
   import EmptyState from '$lib/components/EmptyState.svelte';
   import LoadingState from '$lib/components/LoadingState.svelte';
   import StatusBadge from '$lib/components/StatusBadge.svelte';
+  import Button from '$lib/components/Button.svelte';
   import type { Transaction, TransactionStatus } from '$types';
 
   // Extended transaction type with UI-specific fields
@@ -1045,60 +1046,6 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
-  }
-
-  /* Buttons */
-  .btn {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 0.375rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-decoration: none;
-    display: inline-block;
-  }
-
-  .btn-primary {
-    background: #4299e1;
-    color: white;
-  }
-
-  .btn-primary:hover:not(:disabled) {
-    background: #3182ce;
-  }
-
-  .btn-secondary {
-    background: #e2e8f0;
-    color: #2d3748;
-  }
-
-  .btn-secondary:hover:not(:disabled) {
-    background: #cbd5e0;
-  }
-
-  .btn-success {
-    background: #38a169;
-    color: white;
-  }
-
-  .btn-success:hover:not(:disabled) {
-    background: #2f855a;
-  }
-
-  .btn-danger {
-    background: #e53e3e;
-    color: white;
-  }
-
-  .btn-danger:hover:not(:disabled) {
-    background: #c53030;
-  }
-
-  .btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
   }
 
   /* Alerts */

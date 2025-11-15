@@ -30,6 +30,7 @@
   import { handleError } from '$lib/utils/errors';
   import EmptyState from '$lib/components/EmptyState.svelte';
   import LoadingState from '$lib/components/LoadingState.svelte';
+  import Button from '$lib/components/Button.svelte';
   import type { CartItem, PaymentMethod, CreateTransactionInput } from '$types';
 
   // Cart state (from store)
@@ -583,27 +584,23 @@
           <!-- Navigation Buttons -->
           <div class="form-actions">
             {#if currentStep > 1}
-              <button class="btn btn-secondary" on:click={previousStep}>
+              <Button variant="secondary" on:click={previousStep}>
                 ← Back
-              </button>
+              </Button>
             {/if}
 
             {#if currentStep < 3}
-              <button class="btn btn-primary" on:click={nextStep}>
+              <Button variant="primary" on:click={nextStep}>
                 Continue →
-              </button>
+              </Button>
             {:else}
-              <button
-                class="btn btn-primary"
+              <Button
+                variant="primary"
+                loading={processingCheckout}
                 on:click={completeCheckout}
-                disabled={processingCheckout}
               >
-                {#if processingCheckout}
-                  Processing Order...
-                {:else}
-                  Place Order
-                {/if}
-              </button>
+                Place Order
+              </Button>
             {/if}
           </div>
         </div>
@@ -1121,43 +1118,6 @@
     justify-content: space-between;
     gap: 1rem;
     margin-top: 2rem;
-  }
-
-  /* Buttons */
-  .btn {
-    padding: 0.75rem 2rem;
-    border: none;
-    border-radius: 0.375rem;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-decoration: none;
-    display: inline-block;
-  }
-
-  .btn-primary {
-    background: #4299e1;
-    color: white;
-    flex: 1;
-  }
-
-  .btn-primary:hover:not(:disabled) {
-    background: #3182ce;
-  }
-
-  .btn-secondary {
-    background: #e2e8f0;
-    color: #2d3748;
-  }
-
-  .btn-secondary:hover {
-    background: #cbd5e0;
-  }
-
-  .btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
   }
 
   /* Alerts */

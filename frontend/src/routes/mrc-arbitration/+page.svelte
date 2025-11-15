@@ -32,6 +32,7 @@
   import ErrorState from '$lib/components/ErrorState.svelte';
   import EmptyState from '$lib/components/EmptyState.svelte';
   import LoadingState from '$lib/components/LoadingState.svelte';
+  import Button from '$lib/components/Button.svelte';
   import type { Dispute, ArbitratorProfile, CastVoteInput} from '$types';
 
   // Arbitrator state
@@ -537,28 +538,20 @@
                 {/if}
 
                 <div class="voting-buttons">
-                  <button
-                    class="btn btn-success"
+                  <Button
+                    variant="success"
+                    loading={votingInProgress}
                     on:click={() => castVote(true)}
-                    disabled={votingInProgress}
                   >
-                    {#if votingInProgress}
-                      Voting...
-                    {:else}
-                      ✓ Approve Remedy
-                    {/if}
-                  </button>
-                  <button
-                    class="btn btn-danger"
+                    ✓ Approve Remedy
+                  </Button>
+                  <Button
+                    variant="danger"
+                    loading={votingInProgress}
                     on:click={() => castVote(false)}
-                    disabled={votingInProgress}
                   >
-                    {#if votingInProgress}
-                      Voting...
-                    {:else}
-                      ✕ Reject Remedy
-                    {/if}
-                  </button>
+                    ✕ Reject Remedy
+                  </Button>
                 </div>
               </div>
             {:else if selectedDispute.my_vote}
@@ -1011,40 +1004,6 @@
     transition: all 0.2s;
     text-decoration: none;
     display: inline-block;
-  }
-
-  .btn-secondary {
-    background: #e2e8f0;
-    color: #2d3748;
-  }
-
-  .btn-secondary:hover {
-    background: #cbd5e0;
-  }
-
-  .btn-success {
-    flex: 1;
-    background: #38a169;
-    color: white;
-  }
-
-  .btn-success:hover:not(:disabled) {
-    background: #2f855a;
-  }
-
-  .btn-danger {
-    flex: 1;
-    background: #e53e3e;
-    color: white;
-  }
-
-  .btn-danger:hover:not(:disabled) {
-    background: #c53030;
-  }
-
-  .btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
   }
 
   /* Alerts */

@@ -5,6 +5,7 @@
   import { initHolochainClient } from '$lib/holochain/client';
   import { createDispute } from '$lib/holochain/disputes';
   import { notifications } from '$lib/stores';
+  import Button from '$lib/components/Button.svelte';
   import type { CreateDisputeInput, DisputeReason } from '$types';
 
   // URL parameters
@@ -324,18 +325,16 @@
 
       <!-- Form Actions -->
       <div class="form-actions">
-        <button type="button" class="btn btn-secondary" on:click={handleCancel} disabled={submitting}>
+        <Button variant="secondary" type="button" on:click={handleCancel} disabled={submitting}>
           Cancel
-        </button>
-        <button type="submit" class="btn btn-primary" disabled={submitting || uploadingEvidence}>
-          {#if submitting}
-            Filing Dispute...
-          {:else if uploadingEvidence}
+        </Button>
+        <Button variant="primary" type="submit" loading={submitting || uploadingEvidence}>
+          {#if uploadingEvidence}
             Uploading Evidence...
           {:else}
             Submit to MRC
           {/if}
-        </button>
+        </Button>
       </div>
     </form>
   </div>
@@ -584,41 +583,6 @@
     border-top: 2px solid #e2e8f0;
   }
 
-  .btn {
-    padding: 0.875rem 2rem;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: none;
-  }
-
-  .btn-primary {
-    background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
-    color: white;
-  }
-
-  .btn-primary:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(229, 62, 62, 0.4);
-  }
-
-  .btn-secondary {
-    background: white;
-    color: #2d3748;
-    border: 2px solid #e2e8f0;
-  }
-
-  .btn-secondary:hover:not(:disabled) {
-    background: #f7fafc;
-  }
-
-  .btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
   /* Responsive */
   @media (max-width: 768px) {
     .container {
@@ -631,10 +595,6 @@
 
     .form-actions {
       flex-direction: column;
-    }
-
-    .btn {
-      width: 100%;
     }
   }
 </style>

@@ -20,7 +20,8 @@
   import { notifications } from '$lib/stores';
   import { handleError } from '$lib/utils/errors';
   import LoadingState from '$lib/components/LoadingState.svelte';
-  import type { ListingWithContext, Review, SellerInfo, CreateTransactionInput } from '$types';
+  import Button from '$lib/components/Button.svelte';
+  import type { ListingWithContext, Review, SellerInfo, CreateTransactionInput} from '$types';
 
   // Route parameter
   $: listing_hash = $page.params.listing_hash;
@@ -159,9 +160,9 @@
         <span class="error-icon">⚠️</span>
         <h2>Listing Not Found</h2>
         <p>{error || 'This listing does not exist or has been removed'}</p>
-        <button class="btn btn-primary" on:click={() => goto('/browse')}>
+        <Button variant="primary" on:click={() => goto('/browse')}>
           Browse Marketplace
-        </button>
+        </Button>
       </div>
     {:else}
       <!-- Breadcrumb -->
@@ -276,20 +277,17 @@
             </div>
 
             <div class="action-buttons">
-              <button class="btn btn-secondary btn-large" on:click={addToCart}>
+              <Button variant="secondary" size="lg" on:click={addToCart}>
                 🛒 Add to Cart
-              </button>
-              <button
-                class="btn btn-primary btn-large"
+              </Button>
+              <Button
+                variant="success"
+                size="lg"
+                loading={purchasing}
                 on:click={buyNow}
-                disabled={purchasing}
               >
-                {#if purchasing}
-                  Processing...
-                {:else}
-                  ⚡ Buy Now
-                {/if}
-              </button>
+                ⚡ Buy Now
+              </Button>
             </div>
           </div>
 
@@ -669,44 +667,6 @@
   .action-buttons {
     display: flex;
     gap: 1rem;
-  }
-
-  .btn {
-    flex: 1;
-    padding: 1rem 1.5rem;
-    border: none;
-    border-radius: 0.375rem;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-  }
-
-  .btn-primary {
-    background: #4299e1;
-    color: white;
-  }
-
-  .btn-primary:hover:not(:disabled) {
-    background: #3182ce;
-  }
-
-  .btn-secondary {
-    background: #e2e8f0;
-    color: #2d3748;
-  }
-
-  .btn-secondary:hover {
-    background: #cbd5e0;
-  }
-
-  .btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
   }
 
   /* Description */

@@ -20,6 +20,7 @@
   import ErrorState from '$lib/components/ErrorState.svelte';
   import EmptyState from '$lib/components/EmptyState.svelte';
   import LoadingState from '$lib/components/LoadingState.svelte';
+  import Button from '$lib/components/Button.svelte';
   import type { Listing, ListingCategory } from '$types';
 
   // Extended listing with trust score
@@ -699,35 +700,6 @@
   .quantity {
     font-size: 0.875rem;
     color: #718096;
-  }
-
-  /* Buttons */
-  .btn {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 0.375rem;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .btn-primary {
-    background: #4299e1;
-    color: white;
-  }
-
-  .btn-primary:hover {
-    background: #3182ce;
-  }
-
-  .btn-secondary {
-    background: #e2e8f0;
-    color: #2d3748;
-  }
-
-  .btn-secondary:hover {
-    background: #cbd5e0;
   }
 
   /* Responsive */

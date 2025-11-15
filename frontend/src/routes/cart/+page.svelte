@@ -6,6 +6,7 @@
   import { DEFAULT_TAX_RATE } from '$lib/config/constants';
   import { formatPrice } from '$lib/utils/format';
   import EmptyState from '$lib/components/EmptyState.svelte';
+  import Button from '$lib/components/Button.svelte';
 
   /**
    * Remove item from cart
@@ -216,11 +217,11 @@
             <span>{formatPrice($total, 'USD')}</span>
           </div>
 
-          <button class="btn btn-primary btn-checkout" on:click={proceedToCheckout}>
+          <Button variant="primary" fullWidth on:click={proceedToCheckout}>
             Proceed to Checkout
-          </button>
+          </Button>
 
-          <button class="btn btn-secondary" on:click={continueShopping}>Continue Shopping</button>
+          <Button variant="secondary" fullWidth on:click={continueShopping}>Continue Shopping</Button>
         </div>
       </div>
     {/if}
@@ -495,43 +496,6 @@
     font-weight: 700;
     color: #2d3748;
     margin-bottom: 2rem;
-  }
-
-  /* Buttons */
-  .btn {
-    width: 100%;
-    padding: 1rem;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: none;
-    margin-bottom: 1rem;
-  }
-
-  .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-  }
-
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-  }
-
-  .btn-checkout {
-    margin-bottom: 1rem;
-  }
-
-  .btn-secondary {
-    background: white;
-    color: #2d3748;
-    border: 2px solid #e2e8f0;
-  }
-
-  .btn-secondary:hover {
-    background: #f7fafc;
   }
 
   /* Responsive */
