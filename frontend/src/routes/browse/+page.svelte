@@ -21,6 +21,7 @@
   import EmptyState from '$lib/components/EmptyState.svelte';
   import LoadingState from '$lib/components/LoadingState.svelte';
   import Button from '$lib/components/Button.svelte';
+  import ListingCard from '$lib/components/ListingCard.svelte';
   import type { Listing, ListingCategory } from '$types';
 
   // Extended listing with trust score
@@ -292,52 +293,12 @@
       {:else}
         <div class={`listings-container ${viewMode}`}>
           {#each filteredListings as listing}
-            <button
-              class="listing-card"
+            <ListingCard
+              {listing}
+              variant="full"
               on:click={() => viewListing(listing.listing_hash || listing.id)}
-              on:keydown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  viewListing(listing.listing_hash || listing.id);
-                }
-              }}
-              aria-label="View listing for {listing.title}"
-            >
-              <div class="listing-image">
-                {#if listing.photos_ipfs_cids && listing.photos_ipfs_cids[0]}
-                  <img
-                    src="https://ipfs.io/ipfs/{listing.photos_ipfs_cids[0]}"
-                    alt={listing.title}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                {:else}
-                  <div class="image-placeholder">📷</div>
-                {/if}
-                {#if listing.seller_trust_score}
-                  <div class="trust-badge">{listing.seller_trust_score}% Trust</div>
-                {/if}
-              </div>
-
-              <div class="listing-content">
-                <h3 class="listing-title">{listing.title}</h3>
-                <p class="listing-description">
-                  {listing.description.slice(0, 100)}{listing.description.length > 100 ? '...' : ''}
-                </p>
-
-                <div class="listing-meta">
-                  <span class="category-tag">{listing.category}</span>
-                  <span class="date">{formatTimestamp(listing.created_at, 'short')}</span>
-                </div>
-
-                <div class="listing-footer">
-                  <span class="price">${listing.price.toFixed(2)}</span>
-                  {#if listing.quantity_available}
-                    <span class="quantity">{listing.quantity_available} available</span>
-                  {/if}
-                </div>
-              </div>
-            </button>
+              on:viewDetails={() => viewListing(listing.listing_hash || listing.id)}
+            />
           {/each}
         </div>
       {/if}
@@ -579,129 +540,6 @@
     gap: 1rem;
   }
 
-  /* Listing Card */
-  .listing-card {
-    background: white;
-    border-radius: 0.5rem;
-    overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-    transition: all 0.3s;
-  }
-
-  .listing-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-
-  .listings-container.list .listing-card {
-    display: flex;
-    flex-direction: row;
-  }
-
-  .listing-image {
-    position: relative;
-    width: 100%;
-    height: 200px;
-    overflow: hidden;
-  }
-
-  .listings-container.list .listing-image {
-    width: 250px;
-    height: auto;
-    flex-shrink: 0;
-  }
-
-  .listing-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .image-placeholder {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f7fafc;
-    font-size: 3rem;
-  }
-
-  .trust-badge {
-    position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
-    padding: 0.25rem 0.75rem;
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 0.25rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #38a169;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-
-  /* Listing Content */
-  .listing-content {
-    padding: 1.25rem;
-  }
-
-  .listing-title {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: #2d3748;
-    margin-bottom: 0.5rem;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .listing-description {
-    font-size: 0.875rem;
-    color: #718096;
-    margin-bottom: 1rem;
-    line-height: 1.5;
-  }
-
-  .listing-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-  }
-
-  .category-tag {
-    padding: 0.25rem 0.75rem;
-    background: #edf2f7;
-    color: #4a5568;
-    border-radius: 0.25rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-  }
-
-  .date {
-    font-size: 0.75rem;
-    color: #a0aec0;
-  }
-
-  .listing-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .price {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #38a169;
-  }
-
-  .quantity {
-    font-size: 0.875rem;
-    color: #718096;
-  }
-
   /* Responsive */
   @media (max-width: 768px) {
     .controls-section {
@@ -718,15 +556,6 @@
     .filter-select {
       width: 100%;
       min-width: 0;
-    }
-
-    .listings-container.list .listing-card {
-      flex-direction: column;
-    }
-
-    .listings-container.list .listing-image {
-      width: 100%;
-      height: 200px;
     }
   }
 </style>

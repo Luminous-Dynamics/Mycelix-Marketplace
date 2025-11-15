@@ -24,6 +24,8 @@
   import LoadingState from '$lib/components/LoadingState.svelte';
   import StatusBadge from '$lib/components/StatusBadge.svelte';
   import Button from '$lib/components/Button.svelte';
+  import ListingCard from '$lib/components/ListingCard.svelte';
+  import TransactionCard from '$lib/components/TransactionCard.svelte';
   import type { UserProfile, Listing, Transaction } from '$types';
 
   // State
@@ -177,26 +179,12 @@
           {:else}
             <div class="transaction-list">
               {#each recentTransactions as tx}
-                <button
-                  class="transaction-item"
+                <TransactionCard
+                  transaction={tx}
+                  variant="compact"
+                  showActions={false}
                   on:click={() => goto(`/transactions#${tx.id}`)}
-                  on:keydown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      goto(`/transactions#${tx.id}`);
-                    }
-                  }}
-                  aria-label="View transaction {tx.id.slice(0, 8)}"
-                >
-                  <div class="transaction-info">
-                    <span class="transaction-title">Transaction #{tx.id.slice(0, 8)}...</span>
-                    <span class="transaction-date">{formatRelativeTime(tx.created_at)}</span>
-                  </div>
-                  <div class="transaction-meta">
-                    <StatusBadge status={tx.status} type="transaction" size="sm" />
-                    <span class="transaction-amount">${tx.total_price.toFixed(2)}</span>
-                  </div>
-                </button>
+                />
               {/each}
             </div>
           {/if}
@@ -223,35 +211,12 @@
           {:else}
             <div class="listing-list">
               {#each activeListings as listing}
-                <button
-                  class="listing-item"
+                <ListingCard
+                  {listing}
+                  variant="compact"
+                  showActions={false}
                   on:click={() => goto(`/listing/${listing.listing_hash}`)}
-                  on:keydown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      goto(`/listing/${listing.listing_hash}`);
-                    }
-                  }}
-                  aria-label="View listing {listing.title}"
-                >
-                  <div class="listing-image">
-                    {#if listing.photos_ipfs_cids && listing.photos_ipfs_cids[0]}
-                      <img
-                        src="https://ipfs.io/ipfs/{listing.photos_ipfs_cids[0]}"
-                        alt={listing.title}
-                      />
-                    {:else}
-                      <div class="listing-placeholder">📷</div>
-                    {/if}
-                  </div>
-                  <div class="listing-info">
-                    <h3>{listing.title}</h3>
-                    <p class="listing-price">${listing.price.toFixed(2)}</p>
-                    <p class="listing-meta">
-                      {listing.quantity_available} available · {formatRelativeTime(listing.created_at)}
-                    </p>
-                  </div>
-                </button>
+                />
               {/each}
             </div>
           {/if}
@@ -505,134 +470,11 @@
     gap: 0.75rem;
   }
 
-  .transaction-item {
-    padding: 1rem;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.375rem;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .transaction-item:hover {
-    border-color: #4299e1;
-    box-shadow: 0 2px 8px rgba(66, 153, 225, 0.1);
-  }
-
-  .transaction-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-  }
-
-  .transaction-title {
-    font-weight: 600;
-    color: #2d3748;
-  }
-
-  .transaction-date {
-    font-size: 0.875rem;
-    color: #a0aec0;
-  }
-
-  .transaction-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .status-badge {
-    padding: 0.25rem 0.75rem;
-    border-radius: 0.25rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-  }
-
-  .status-pending {
-    background: #feebc8;
-    color: #7c2d12;
-  }
-
-  .status-shipped {
-    background: #bee3f8;
-    color: #2c5282;
-  }
-
-  .status-delivered,
-  .status-completed {
-    background: #c6f6d5;
-    color: #22543d;
-  }
-
-  .transaction-amount {
-    font-weight: 700;
-    color: #2d3748;
-  }
-
   /* Listing List */
   .listing-list {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-  }
-
-  .listing-item {
-    display: flex;
-    gap: 1rem;
-    padding: 1rem;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.375rem;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .listing-item:hover {
-    border-color: #4299e1;
-    box-shadow: 0 2px 8px rgba(66, 153, 225, 0.1);
-  }
-
-  .listing-image {
-    width: 80px;
-    height: 80px;
-    border-radius: 0.375rem;
-    overflow: hidden;
-    flex-shrink: 0;
-  }
-
-  .listing-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .listing-placeholder {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f7fafc;
-    font-size: 2rem;
-  }
-
-  .listing-info h3 {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #2d3748;
-    margin-bottom: 0.25rem;
-  }
-
-  .listing-price {
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: #38a169;
-    margin-bottom: 0.25rem;
-  }
-
-  .listing-meta {
-    font-size: 0.875rem;
-    color: #718096;
   }
 
   /* Responsive */
