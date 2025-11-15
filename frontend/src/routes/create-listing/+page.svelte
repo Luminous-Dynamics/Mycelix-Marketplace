@@ -6,20 +6,43 @@
   import { notifications } from '$lib/stores';
   import { validateImageFiles, MAX_PHOTOS_PER_LISTING } from '$lib/utils';
   import { LISTING_CATEGORIES } from '$lib/config/constants';
+  import { createFormStore } from '$lib/utils/forms';
+  import { commonValidations, validators } from '$lib/utils/formValidation';
   import Button from '$lib/components/Button.svelte';
   import PhotoUploader from '$lib/components/PhotoUploader.svelte';
   import type { CreateListingInput, ListingCategory } from '$types';
 
-  // Form state
-  let title = '';
-  let description = '';
-  let price = 0;
-  let category: ListingCategory = 'Other';
-  let quantityAvailable = 1;
-  let photoFiles: File[] = [];
+  // Form store with validation
+  const form = createFormStore(
+    {
+      title: '',
+      description: '',
+      price: 0,
+      category: 'Other' as ListingCategory,
+      quantityAvailable: 1,
+      photoFiles: [] as File[],
+    },
+    {
+      title: commonValidations.listingTitle,
+      description: commonValidations.listingDescription,
+      price: commonValidations.price,
+      quantityAvailable: validators.compose(
+        validators.required('Quantity is required'),
+        validators.min(1, 'Quantity must be at least 1')
+      ),
+      photoFiles: validators.custom((files: File[]) => {
+        if (!files || files.length === 0) {
+          return { valid: false, error: 'At least one photo is required' };
+        }
+        if (files.length > MAX_PHOTOS_PER_LISTING) {
+          return { valid: false, error: `Maximum ${MAX_PHOTOS_PER_LISTING} photos allowed` };
+        }
+        return { valid: true };
+      }),
+    }
+  );
 
   // UI state
-  let submitting = false;
   let uploadingPhotos = false;
 
   // Categories for dropdown
@@ -29,7 +52,7 @@
    * Handle photos change from PhotoUploader
    */
   function handlePhotosChange(event: CustomEvent<{ photos: File[] }>) {
-    photoFiles = event.detail.photos;
+    form.setValue('photoFiles', event.detail.photos);
   }
 
   /**
@@ -54,7 +77,7 @@
       // - Pinata API for cloud IPFS pinning
       // - Web3.storage for decentralized storage
 
-      const mockCids = photoFiles.map((file) => {
+      const mockCids = $form.values.photoFiles.map((file) => {
         // Generate mock IPFS CID (base58 hash)
         const hash = btoa(file.name + Date.now()).replace(/[^a-zA-Z0-9]/g, '');
         return `Qm${hash.substring(0, 44)}`;
@@ -70,66 +93,20 @@
   }
 
   /**
-   * Validate form
-   */
-  function validateForm(): boolean {
-    if (!title.trim()) {
-      notifications.error('Validation Error', 'Title is required');
-      return false;
-    }
-
-    if (title.length < 5) {
-      notifications.error('Validation Error', 'Title must be at least 5 characters');
-      return false;
-    }
-
-    if (!description.trim()) {
-      notifications.error('Validation Error', 'Description is required');
-      return false;
-    }
-
-    if (description.length < 20) {
-      notifications.error('Validation Error', 'Description must be at least 20 characters');
-      return false;
-    }
-
-    if (price <= 0) {
-      notifications.error('Validation Error', 'Price must be greater than $0');
-      return false;
-    }
-
-    if (price > 1000000) {
-      notifications.error('Validation Error', 'Price cannot exceed $1,000,000');
-      return false;
-    }
-
-    if (quantityAvailable < 1) {
-      notifications.error('Validation Error', 'Quantity must be at least 1');
-      return false;
-    }
-
-    if (photoFiles.length === 0) {
-      notifications.error('Validation Error', 'At least one photo is required');
-      return false;
-    }
-
-    if (photoFiles.length > MAX_PHOTOS_PER_LISTING) {
-      notifications.error('Validation Error', `Maximum ${MAX_PHOTOS_PER_LISTING} photos allowed`);
-      return false;
-    }
-
-    return true;
-  }
-
-  /**
    * Submit form
    */
   async function handleSubmit() {
-    if (!validateForm()) return;
+    // Validate form using form store
+    if (!form.validate()) {
+      // Get first error message
+      const errors = Object.values($form.errors);
+      if (errors.length > 0) {
+        notifications.error('Validation Error', errors[0] as string);
+      }
+      return;
+    }
 
-    submitting = true;
-
-    try {
+    await form.submit(async (values) => {
       // Upload photos to IPFS
       notifications.info('Uploading Photos', 'Uploading photos to IPFS...');
       const photoCids = await uploadPhotosToIPFS();
@@ -139,12 +116,12 @@
 
       // Create listing input
       const listingInput: CreateListingInput = {
-        title: title.trim(),
-        description: description.trim(),
-        price,
-        category,
+        title: values.title.trim(),
+        description: values.description.trim(),
+        price: values.price,
+        category: values.category,
         photos_ipfs_cids: photoCids,
-        quantity_available: quantityAvailable,
+        quantity_available: values.quantityAvailable,
       };
 
       // Create listing
@@ -158,13 +135,7 @@
       setTimeout(() => {
         goto(`/listing/${createdListing.listing_hash || createdListing.id}`);
       }, 1500);
-    } catch (err: unknown) {
-      console.error('Failed to create listing:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create listing';
-      notifications.error('Creation Failed', errorMessage);
-    } finally {
-      submitting = false;
-    }
+    });
   }
 
   /**
@@ -199,12 +170,12 @@
         <input
           id="title-input"
           type="text"
-          bind:value={title}
+          bind:value={$form.values.title}
           placeholder="E.g., iPhone 13 Pro - Like New"
           maxlength="100"
           required
         />
-        <small class="help-text">{title.length}/100 characters</small>
+        <small class="help-text">{$form.values.title.length}/100 characters</small>
       </div>
 
       <!-- Description -->
@@ -214,13 +185,13 @@
         </label>
         <textarea
           id="description-input"
-          bind:value={description}
+          bind:value={$form.values.description}
           placeholder="Provide a detailed description of your item, including condition, features, and any defects..."
           rows="6"
           maxlength="2000"
           required
         />
-        <small class="help-text">{description.length}/2000 characters</small>
+        <small class="help-text">{$form.values.description.length}/2000 characters</small>
       </div>
 
       <!-- Price & Quantity Row -->
@@ -235,7 +206,7 @@
             <input
               id="price-input"
               type="number"
-              bind:value={price}
+              bind:value={$form.values.price}
               min="0.01"
               step="0.01"
               placeholder="0.00"
@@ -250,7 +221,7 @@
           <input
             id="quantity-input"
             type="number"
-            bind:value={quantityAvailable}
+            bind:value={$form.values.quantityAvailable}
             min="1"
             max="10000"
             required
@@ -263,7 +234,7 @@
         <label for="category-input">
           Category <span class="required">*</span>
         </label>
-        <select id="category-input" bind:value={category} required>
+        <select id="category-input" bind:value={$form.values.category} required>
           {#each categories as cat}
             <option value={cat}>{cat}</option>
           {/each}
@@ -276,10 +247,10 @@
           Photos <span class="required">*</span>
         </label>
         <PhotoUploader
-          bind:photos={photoFiles}
+          bind:photos={$form.values.photoFiles}
           maxPhotos={MAX_PHOTOS_PER_LISTING}
           uploading={uploadingPhotos}
-          disabled={submitting}
+          disabled={$form.submitting}
           on:photosChange={handlePhotosChange}
           on:error={handlePhotoError}
         />
@@ -287,10 +258,10 @@
 
       <!-- Form Actions -->
       <div class="form-actions">
-        <Button variant="secondary" type="button" on:click={handleCancel} disabled={submitting}>
+        <Button variant="secondary" type="button" on:click={handleCancel} disabled={$form.submitting}>
           Cancel
         </Button>
-        <Button variant="primary" type="submit" loading={submitting || uploadingPhotos} disabled={submitting || uploadingPhotos}>
+        <Button variant="primary" type="submit" loading={$form.submitting || uploadingPhotos} disabled={$form.submitting || uploadingPhotos}>
           {#if uploadingPhotos}
             Uploading Photos...
           {:else}

@@ -5,6 +5,8 @@
   import { initHolochainClient } from '$lib/holochain/client';
   import { createDispute } from '$lib/holochain/disputes';
   import { notifications } from '$lib/stores';
+  import { createFormStore } from '$lib/utils/forms';
+  import { commonValidations } from '$lib/utils/formValidation';
   import Button from '$lib/components/Button.svelte';
   import PhotoUploader from '$lib/components/PhotoUploader.svelte';
   import type { CreateDisputeInput, DisputeReason } from '$types';
@@ -14,13 +16,20 @@
   let listingTitle = '';
   let sellerName = '';
 
-  // Form state
-  let reason: DisputeReason = 'not_as_described';
-  let description = '';
-  let evidenceFiles: File[] = [];
+  // Form store with validation
+  const form = createFormStore(
+    {
+      reason: 'not_as_described' as DisputeReason,
+      description: '',
+      evidenceFiles: [] as File[],
+    },
+    {
+      description: commonValidations.disputeDescription,
+      // evidenceFiles is optional, so no validation
+    }
+  );
 
   // UI state
-  let submitting = false;
   let uploadingEvidence = false;
 
   // Dispute reasons for dropdown
@@ -54,7 +63,7 @@
    * Handle evidence change from PhotoUploader
    */
   function handleEvidenceChange(event: CustomEvent<{ photos: File[] }>) {
-    evidenceFiles = event.detail.photos;
+    form.setValue('evidenceFiles', event.detail.photos);
   }
 
   /**
@@ -79,7 +88,7 @@
       // - Pinata API for cloud IPFS pinning
       // - Web3.storage for decentralized storage
 
-      const mockCids = evidenceFiles.map((file) => {
+      const mockCids = $form.values.evidenceFiles.map((file) => {
         // Generate mock IPFS CID (base58 hash)
         const hash = btoa(file.name + Date.now()).replace(/[^a-zA-Z0-9]/g, '');
         return `Qm${hash.substring(0, 44)}`;
@@ -95,39 +104,27 @@
   }
 
   /**
-   * Validate form
-   */
-  function validateForm(): boolean {
-    if (!description.trim()) {
-      notifications.error('Description Required', 'Please describe the issue');
-      return false;
-    }
-
-    if (description.trim().length < 20) {
-      notifications.error('Description Too Short', 'Please write at least 20 characters');
-      return false;
-    }
-
-    if (evidenceFiles.length === 0) {
-      notifications.warning('No Evidence', 'Consider uploading photos or documents to support your claim');
-      // Don't block submission, just warn
-    }
-
-    return true;
-  }
-
-  /**
    * Submit dispute
    */
   async function handleSubmit() {
-    if (!validateForm()) return;
+    // Validate form using form store
+    if (!form.validate()) {
+      const errors = Object.values($form.errors);
+      if (errors.length > 0) {
+        notifications.error('Validation Error', errors[0] as string);
+      }
+      return;
+    }
 
-    submitting = true;
+    // Show warning if no evidence
+    if ($form.values.evidenceFiles.length === 0) {
+      notifications.warning('No Evidence', 'Consider uploading photos or documents to support your claim');
+    }
 
-    try {
+    await form.submit(async (values) => {
       // Upload evidence to IPFS
       let evidenceCids: string[] = [];
-      if (evidenceFiles.length > 0) {
+      if (values.evidenceFiles.length > 0) {
         notifications.info('Uploading Evidence', 'Uploading evidence to IPFS...');
         evidenceCids = await uploadEvidenceToIPFS();
       }
@@ -138,8 +135,8 @@
       // Create dispute input
       const disputeInput: CreateDisputeInput = {
         transaction_hash: transactionHash,
-        reason,
-        description: description.trim(),
+        reason: values.reason,
+        description: values.description.trim(),
         evidence_ipfs_cids: evidenceCids,
       };
 
@@ -156,12 +153,7 @@
       setTimeout(() => {
         goto('/transactions');
       }, 2000);
-    } catch (e: any) {
-      console.error('Failed to file dispute:', e);
-      notifications.error('Submission Failed', e.message || 'Failed to file dispute');
-    } finally {
-      submitting = false;
-    }
+    });
   }
 
   /**
@@ -204,7 +196,7 @@
         <label for="reason-input">
           Dispute Reason <span class="required">*</span>
         </label>
-        <select id="reason-input" bind:value={reason} required>
+        <select id="reason-input" bind:value={$form.values.reason} required>
           {#each reasons as reasonOption}
             <option value={reasonOption.value}>{reasonOption.label}</option>
           {/each}
@@ -218,23 +210,23 @@
         </label>
         <textarea
           id="description-input"
-          bind:value={description}
+          bind:value={$form.values.description}
           placeholder="Please provide a detailed explanation of the issue. Include what you expected, what you received, and any communication with the seller..."
           rows="8"
           maxlength="2000"
           required
         />
-        <small class="help-text">{description.length}/2000 characters (minimum 20)</small>
+        <small class="help-text">{$form.values.description.length}/2000 characters (minimum 20)</small>
       </div>
 
       <!-- Evidence Upload -->
       <div class="form-group">
         <label>Supporting Evidence (Optional)</label>
         <PhotoUploader
-          bind:photos={evidenceFiles}
+          bind:photos={$form.values.evidenceFiles}
           maxPhotos={10}
           uploading={uploadingEvidence}
-          disabled={submitting}
+          disabled={$form.submitting}
           on:photosChange={handleEvidenceChange}
           on:error={handleEvidenceError}
         />
@@ -258,10 +250,10 @@
 
       <!-- Form Actions -->
       <div class="form-actions">
-        <Button variant="secondary" type="button" on:click={handleCancel} disabled={submitting}>
+        <Button variant="secondary" type="button" on:click={handleCancel} disabled={$form.submitting}>
           Cancel
         </Button>
-        <Button variant="primary" type="submit" loading={submitting || uploadingEvidence}>
+        <Button variant="primary" type="submit" loading={$form.submitting || uploadingEvidence}>
           {#if uploadingEvidence}
             Uploading Evidence...
           {:else}
