@@ -1,15 +1,29 @@
 <script lang="ts">
   import '../app.css';
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { initHolochainClient } from '$lib/holochain/client';
+  import { registerShortcuts } from '$lib/utils/keyboardShortcuts';
 
-  // Initialize Holochain connection on app startup
+  let cleanupShortcuts: (() => void) | null = null;
+
+  // Initialize Holochain connection and keyboard shortcuts on app startup
   onMount(async () => {
     try {
       await initHolochainClient();
       console.log('Holochain client initialized');
     } catch (e) {
       console.error('Failed to connect to Holochain:', e);
+    }
+
+    // Register global keyboard shortcuts
+    cleanupShortcuts = registerShortcuts();
+    console.log('Global keyboard shortcuts registered');
+  });
+
+  onDestroy(() => {
+    // Clean up keyboard shortcuts
+    if (cleanupShortcuts) {
+      cleanupShortcuts();
     }
   });
 </script>

@@ -11,3 +11,4 @@ export * from './formValidation';
 export * from './forms';
 export * from './stores';
 export * from './modal';
+export * from './keyboardShortcuts';
