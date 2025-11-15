@@ -11,11 +11,13 @@
    */
 
   import { onMount } from 'svelte';
+  import { writable, derived } from 'svelte/store';
   import { goto } from '$app/navigation';
   import { initHolochainClient } from '$lib/holochain';
   import { getAllListings, searchListings, getListingsByCategory } from '$lib/holochain/listings';
   import { notifications } from '$lib/stores';
-  import { debounce, formatTimestamp } from '$lib/utils';
+  import { createSearchStore } from '$lib/utils/stores';
+  import { formatTimestamp } from '$lib/utils';
   import { LISTING_CATEGORIES } from '$lib/config/constants';
   import ErrorState from '$lib/components/ErrorState.svelte';
   import EmptyState from '$lib/components/EmptyState.svelte';
@@ -32,18 +34,66 @@
   // State
   let loading = true;
   let error = '';
-  let allListings: ListingWithTrust[] = [];
-  let filteredListings: ListingWithTrust[] = [];
-
-  // Filters
-  let searchQuery = '';
-  let selectedCategory: ListingCategory | 'All Categories' = 'All Categories';
-  let minPrice = 0;
-  let maxPrice = 10000;
-  let sortBy: 'newest' | 'price-low' | 'price-high' | 'trust' = 'newest';
-
-  // View mode
   let viewMode: 'grid' | 'list' = 'grid';
+
+  // Stores for reactive filtering
+  const allListingsStore = writable<ListingWithTrust[]>([]);
+  const searchQueryStore = writable('');
+  const selectedCategoryStore = writable<ListingCategory | 'All Categories'>('All Categories');
+  const minPriceStore = writable(0);
+  const maxPriceStore = writable(10000);
+  const sortByStore = writable<'newest' | 'price-low' | 'price-high' | 'trust'>('newest');
+
+  // Derived stores for optimized filtering
+
+  // Step 1: Filter by category and price
+  const categoryAndPriceFiltered = derived(
+    [allListingsStore, selectedCategoryStore, minPriceStore, maxPriceStore],
+    ([$all, $category, $minPrice, $maxPrice]) => {
+      return $all.filter((listing) => {
+        // Category filter
+        if ($category !== 'All Categories' && listing.category !== $category) {
+          return false;
+        }
+
+        // Price filter
+        if (listing.price < $minPrice || listing.price > $maxPrice) {
+          return false;
+        }
+
+        return true;
+      });
+    }
+  );
+
+  // Step 2: Apply search filter with debouncing
+  const searchFiltered = createSearchStore(
+    categoryAndPriceFiltered,
+    searchQueryStore,
+    ['title', 'description', 'category'],
+    300 // 300ms debounce
+  );
+
+  // Step 3: Apply sorting to filtered results
+  const sortedListings = derived(
+    [searchFiltered, sortByStore],
+    ([$filtered, $sortBy]) => {
+      const listings = [...$filtered];
+
+      switch ($sortBy) {
+        case 'newest':
+          return listings.sort((a, b) => b.created_at - a.created_at);
+        case 'price-low':
+          return listings.sort((a, b) => a.price - b.price);
+        case 'price-high':
+          return listings.sort((a, b) => b.price - a.price);
+        case 'trust':
+          return listings.sort((a, b) => (b.seller_trust_score || 0) - (a.seller_trust_score || 0));
+        default:
+          return listings;
+      }
+    }
+  );
 
   // Categories
   const categories: (ListingCategory | 'All Categories')[] = [
@@ -67,14 +117,15 @@
       const listings = await getAllListings(client);
 
       // Add placeholder trust scores (TODO: batch fetch seller profiles)
-      allListings = listings.map((listing) => ({
+      const listingsWithTrust = listings.map((listing) => ({
         ...listing,
         seller_trust_score: 85, // Default value
       }));
 
-      applyFilters();
+      // Update store instead of direct assignment
+      allListingsStore.set(listingsWithTrust);
 
-      notifications.success('Listings Loaded', `Found ${allListings.length} listings`);
+      notifications.success('Listings Loaded', `Found ${listingsWithTrust.length} listings`);
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load listings';
       error = errorMessage;
@@ -83,72 +134,6 @@
       loading = false;
     }
   }
-
-  /**
-   * Apply filters and sorting
-   */
-  function applyFilters() {
-    let filtered = [...allListings];
-
-    // Category filter
-    if (selectedCategory !== 'All Categories') {
-      filtered = filtered.filter((l) => l.category === selectedCategory);
-    }
-
-    // Price filter
-    filtered = filtered.filter((l) => l.price >= minPrice && l.price <= maxPrice);
-
-    // Search filter
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (l) =>
-          l.title.toLowerCase().includes(query) ||
-          l.description.toLowerCase().includes(query) ||
-          l.category.toLowerCase().includes(query)
-      );
-    }
-
-    // Sort
-    switch (sortBy) {
-      case 'newest':
-        filtered.sort((a, b) => b.created_at - a.created_at);
-        break;
-      case 'price-low':
-        filtered.sort((a, b) => a.price - b.price);
-        break;
-      case 'price-high':
-        filtered.sort((a, b) => b.price - a.price);
-        break;
-      case 'trust':
-        filtered.sort((a, b) => (b.seller_trust_score || 0) - (a.seller_trust_score || 0));
-        break;
-    }
-
-    filteredListings = filtered;
-  }
-
-  /**
-   * Debounced filter application for search (300ms delay)
-   */
-  const debouncedApplyFilters = debounce(applyFilters, 300);
-
-  /**
-   * Reactive filter application
-   * Search query is debounced to improve performance
-   * Other filters apply immediately
-   */
-  $: if (allListings.length > 0) {
-    applyFilters();
-  }
-
-  // Debounce search query changes
-  $: if (searchQuery !== undefined) {
-    debouncedApplyFilters();
-  }
-
-  // Apply filters immediately for non-search changes
-  $: selectedCategory, minPrice, maxPrice, sortBy, applyFilters();
 
   /**
    * View listing details
@@ -184,7 +169,7 @@
             <input
               type="text"
               placeholder="Search listings..."
-              bind:value={searchQuery}
+              bind:value={$searchQueryStore}
               class="search-input"
               aria-label="Search listings by title, description, or category"
             />
@@ -193,7 +178,7 @@
           <!-- Category -->
           <div class="filter-group">
             <select
-              bind:value={selectedCategory}
+              bind:value={$selectedCategoryStore}
               class="filter-select"
               aria-label="Filter by category"
             >
@@ -206,25 +191,25 @@
           <!-- Price Range -->
           <div class="filter-group price-filter">
             <label>
-              <span>Min: ${minPrice}</span>
+              <span>Min: ${$minPriceStore}</span>
               <input
                 type="range"
                 min="0"
                 max="10000"
                 step="50"
-                bind:value={minPrice}
+                bind:value={$minPriceStore}
                 class="price-slider"
                 aria-label="Minimum price filter"
               />
             </label>
             <label>
-              <span>Max: ${maxPrice}</span>
+              <span>Max: ${$maxPriceStore}</span>
               <input
                 type="range"
                 min="0"
                 max="10000"
                 step="50"
-                bind:value={maxPrice}
+                bind:value={$maxPriceStore}
                 class="price-slider"
                 aria-label="Maximum price filter"
               />
@@ -234,7 +219,7 @@
           <!-- Sort -->
           <div class="filter-group">
             <select
-              bind:value={sortBy}
+              bind:value={$sortByStore}
               class="filter-select"
               aria-label="Sort listings"
             >
@@ -271,11 +256,11 @@
 
       <!-- Results Count -->
       <div class="results-info">
-        <p>{filteredListings.length} listings found</p>
+        <p>{$sortedListings.length} listings found</p>
       </div>
 
       <!-- Listings Grid/List -->
-      {#if filteredListings.length === 0}
+      {#if $sortedListings.length === 0}
         <EmptyState
           icon="🔍"
           title="No listings found"
@@ -284,15 +269,15 @@
           actionText="Clear Filters"
           actionVariant="secondary"
           on:action={() => {
-            searchQuery = '';
-            selectedCategory = 'All Categories';
-            minPrice = 0;
-            maxPrice = 10000;
+            searchQueryStore.set('');
+            selectedCategoryStore.set('All Categories');
+            minPriceStore.set(0);
+            maxPriceStore.set(10000);
           }}
         />
       {:else}
         <div class={`listings-container ${viewMode}`}>
-          {#each filteredListings as listing}
+          {#each $sortedListings as listing}
             <ListingCard
               {listing}
               variant="full"
