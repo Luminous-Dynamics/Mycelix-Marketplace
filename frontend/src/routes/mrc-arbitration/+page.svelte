@@ -19,6 +19,7 @@
 
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
+  import { focusTrap, bodyScrollLock } from '$lib/utils/modal';
   import PhotoGallery from '$lib/components/PhotoGallery.svelte';
   import { initHolochainClient } from '$lib/holochain';
   import {
@@ -456,16 +457,13 @@
       {#if selectedDispute}
         <div
           class="dispute-modal"
+          use:bodyScrollLock
           on:click={() => (selectedDispute = null)}
-          on:keydown={(e) => {
-            if (e.key === 'Escape') {
-              selectedDispute = null;
-            }
-          }}
           role="presentation"
         >
           <div
             class="modal-content"
+            use:focusTrap={{ onEscape: () => (selectedDispute = null) }}
             on:click|stopPropagation
             role="dialog"
             aria-modal="true"

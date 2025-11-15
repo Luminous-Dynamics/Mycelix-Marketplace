@@ -20,6 +20,7 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { getIpfsUrl } from '$lib/ipfs/ipfsClient';
+  import { focusTrap, bodyScrollLock } from '$lib/utils/modal';
   import TrustBadge from '$lib/components/TrustBadge.svelte';
   import { initHolochainClient } from '$lib/holochain';
   import { getMyPurchases, getMySales, confirmDelivery as confirmDeliveryZome, markAsShipped as markAsShippedZome } from '$lib/holochain/transactions';
@@ -341,16 +342,13 @@
     {#if selectedTransaction}
       <div
         class="transaction-modal"
+        use:bodyScrollLock
         on:click={() => (selectedTransaction = null)}
-        on:keydown={(e) => {
-          if (e.key === 'Escape') {
-            selectedTransaction = null;
-          }
-        }}
         role="presentation"
       >
         <div
           class="modal-content"
+          use:focusTrap={{ onEscape: () => (selectedTransaction = null) }}
           on:click|stopPropagation
           role="dialog"
           aria-modal="true"
