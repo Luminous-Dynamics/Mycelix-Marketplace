@@ -28,6 +28,7 @@
   import { handleError } from '$lib/utils/errors';
   import ErrorState from '$lib/components/ErrorState.svelte';
   import EmptyState from '$lib/components/EmptyState.svelte';
+  import StatusBadge from '$lib/components/StatusBadge.svelte';
   import type { Transaction, TransactionStatus } from '$types';
 
   // Extended transaction type with UI-specific fields
@@ -259,27 +260,6 @@
     });
   }
 
-  /**
-   * Get status badge class
-   */
-  function getStatusClass(status: string): string {
-    const statusMap: Record<string, string> = {
-      pending: 'status-warning',
-      shipped: 'status-info',
-      delivered: 'status-success',
-      completed: 'status-success',
-      cancelled: 'status-error',
-      disputed: 'status-error',
-    };
-    return statusMap[status] || 'status-default';
-  }
-
-  /**
-   * Get status display name
-   */
-  function getStatusName(status: string): string {
-    return status.charAt(0).toUpperCase() + status.slice(1);
-  }
 </script>
 
 <div class="transactions-page">
@@ -369,9 +349,7 @@
                   {/if}
                 </div>
 
-                <span class={`status-badge ${getStatusClass(transaction.status)}`}>
-                  {getStatusName(transaction.status)}
-                </span>
+                <StatusBadge status={transaction.status} type="transaction" size="sm" />
               </div>
 
               <!-- Transaction Content -->
@@ -439,9 +417,7 @@
           <div class="modal-section">
             <div class="section-header">
               <h3>{selectedTransaction.listing_title}</h3>
-              <span class={`status-badge ${getStatusClass(selectedTransaction.status)}`}>
-                {getStatusName(selectedTransaction.status)}
-              </span>
+              <StatusBadge status={selectedTransaction.status} type="transaction" />
             </div>
 
             {#if selectedTransaction.listing_photo_cid}

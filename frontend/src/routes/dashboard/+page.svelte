@@ -21,6 +21,7 @@
   import { formatRelativeTime } from '$lib/utils/format';
   import ErrorState from '$lib/components/ErrorState.svelte';
   import EmptyState from '$lib/components/EmptyState.svelte';
+  import StatusBadge from '$lib/components/StatusBadge.svelte';
   import type { UserProfile, Listing, Transaction } from '$types';
 
   // State
@@ -194,7 +195,7 @@
                     <span class="transaction-date">{formatRelativeTime(tx.created_at)}</span>
                   </div>
                   <div class="transaction-meta">
-                    <span class={`status-badge status-${tx.status}`}>{tx.status}</span>
+                    <StatusBadge status={tx.status} type="transaction" size="sm" />
                     <span class="transaction-amount">${tx.total_price.toFixed(2)}</span>
                   </div>
                 </button>
