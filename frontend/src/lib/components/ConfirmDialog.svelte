@@ -3,6 +3,7 @@
    * Confirm Dialog Component
    *
    * A reusable confirmation dialog for destructive or important actions.
+   * Now with focus trap for improved accessibility (WCAG 2.1 compliance).
    *
    * @component
    * @example
@@ -21,6 +22,7 @@
    */
 
   import { createEventDispatcher } from 'svelte';
+  import { focusTrap, bodyScrollLock } from '$lib/utils/modal';
 
   // Props
   /** Whether the dialog is open */
@@ -70,25 +72,23 @@
       handleCancel();
     }
   }
-
-  function handleKeydown(event: KeyboardEvent) {
-    if (event.key === 'Escape') {
-      handleCancel();
-    }
-  }
 </script>
 
 {#if open}
-  <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div
     class="dialog-backdrop"
     on:click={handleBackdropClick}
-    on:keydown={handleKeydown}
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="dialog-title"
+    use:bodyScrollLock
   >
-    <div class="dialog-container" class:loading>
+    <div
+      class="dialog-container"
+      class:loading
+      use:focusTrap={{ onEscape: handleCancel, initialFocus: 'last' }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="dialog-title"
+    >
       <div class="dialog-header">
         <h2 id="dialog-title" class="dialog-title">{title}</h2>
         {#if !loading}
