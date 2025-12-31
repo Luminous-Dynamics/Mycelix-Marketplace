@@ -1,0 +1,16 @@
+# Cargo configuration for Holochain WASM builds
+#
+# This file configures the build for wasm32-unknown-unknown target,
+# which is required for Holochain zomes.
+
+[target.wasm32-unknown-unknown]
+# Configure getrandom to use a custom RNG for WASM
+# Holochain provides its own entropy source
+rustflags = [
+  "--cfg=getrandom_backend=\"custom\""
+]
+
+[build]
+# Set the default target for this workspace
+# Uncomment if you want WASM to be the default build target
+# target = "wasm32-unknown-unknown"

@@ -1,0 +1,17 @@
+---
+manifest_version: "1"
+name: mycelix_marketplace
+description: "Decentralized P2P marketplace with 45% Byzantine fault tolerance via MATL (Mycelix Adaptive Trust Layer)"
+roles:
+  - name: marketplace
+    provisioning:
+      strategy: create
+      deferred: false
+    dna:
+      bundled: dna.dna
+      modifiers:
+        network_seed: ~
+        properties: ~
+        origin_time: ~
+      installed_hash: ~
+      clone_limit: 0
