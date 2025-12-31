@@ -35,8 +35,7 @@
             wasm-pack    # WASM build tool
 
             # Holochain tools from official flake
-            holochainPkgs.holochain  # Holochain conductor
-            holochainPkgs.lair-keystore  # Keystore
+            holochainPkgs.holochain  # Holochain conductor (includes lair-keystore)
             holochainPkgs.hc  # Holochain CLI (hc bundle, hc dna, hc app)
 
             # Development tools
