@@ -3,6 +3,7 @@ resolver = "2"
 
 members = [
   "crates/mycelix_common",
+  # Phase 1: Core marketplace zomes (refactored and tested)
   "zomes/listings/integrity",
   "zomes/listings/coordinator",
   "zomes/reputation/integrity",
@@ -13,11 +14,13 @@ members = [
   "zomes/arbitration/coordinator",
   "zomes/messaging/integrity",
   "zomes/messaging/coordinator",
-  "zomes/notifications",
-  "zomes/security",
-  "zomes/monitoring",
-  "zomes/search",
 ]
+
+# Excluded: Future zomes (not yet updated to HDK 0.6.0/HDI 0.7.0)
+# - zomes/notifications (needs updates)
+# - zomes/security (needs updates)
+# - zomes/monitoring (needs updates)
+# - zomes/search (needs updates)
 
 [workspace.dependencies]
 # Holochain 0.6.0 dependencies
