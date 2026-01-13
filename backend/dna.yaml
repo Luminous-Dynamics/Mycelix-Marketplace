@@ -1,60 +1,71 @@
 ---
-manifest_version: "1"
+# Mycelix Marketplace DNA
+# P2P commerce with MATL trust scoring and MRC arbitration
+
+manifest_version: "0"
 name: mycelix_marketplace
 integrity:
-  origin_time: 2024-01-01T00:00:00.000000Z
   network_seed: ~
-  properties: ~
+  properties:
+    # MATL configuration
+    quality_weight: 0.4
+    consistency_weight: 0.3
+    reputation_weight: 0.3
+    min_trust_for_listing: 0.3
+
+    # Arbitration settings
+    arbitration_timeout_days: 14
+    max_arbitrators: 5
 
   # Integrity zomes define data validation rules
   zomes:
     - name: listings_integrity
-      bundled: zomes/listings/integrity.wasm
+      path: zomes/listings/integrity.wasm
 
     - name: reputation_integrity
-      bundled: zomes/reputation/integrity.wasm
+      path: zomes/reputation/integrity.wasm
 
     - name: transactions_integrity
-      bundled: zomes/transactions/integrity.wasm
+      path: zomes/transactions/integrity.wasm
 
     - name: arbitration_integrity
-      bundled: zomes/arbitration/integrity.wasm
+      path: zomes/arbitration/integrity.wasm
 
     - name: messaging_integrity
-      bundled: zomes/messaging/integrity.wasm
+      path: zomes/messaging/integrity.wasm
 
 # Coordinator zomes implement business logic
 coordinator:
   zomes:
     - name: listings
-      bundled: zomes/listings/coordinator.wasm
+      path: zomes/listings/coordinator.wasm
       dependencies:
         - name: listings_integrity
-        - name: reputation_integrity  # Listings need trust scores
+        - name: reputation_integrity
 
     - name: reputation
-      bundled: zomes/reputation/coordinator.wasm
+      path: zomes/reputation/coordinator.wasm
       dependencies:
         - name: reputation_integrity
 
     - name: transactions
-      bundled: zomes/transactions/coordinator.wasm
+      path: zomes/transactions/coordinator.wasm
       dependencies:
         - name: transactions_integrity
-        - name: listings_integrity  # Transactions reference listings
-        - name: reputation_integrity  # Need seller trust scores
+        - name: listings_integrity
+        - name: reputation_integrity
 
     - name: arbitration
-      bundled: zomes/arbitration/coordinator.wasm
+      path: zomes/arbitration/coordinator.wasm
       dependencies:
         - name: arbitration_integrity
-        - name: transactions_integrity  # Disputes reference transactions
-        - name: reputation_integrity  # Arbitrators need reputation
+        - name: transactions_integrity
+        - name: reputation_integrity
 
     - name: messaging
-      bundled: zomes/messaging/coordinator.wasm
+      path: zomes/messaging/coordinator.wasm
       dependencies:
         - name: messaging_integrity
-        - name: reputation_integrity  # MATL gating for spam prevention
-        - name: listings_integrity  # Conversations can reference listings
-        - name: transactions_integrity  # Conversations can reference transactions
+        - name: reputation_integrity
+        - name: listings_integrity
+        - name: transactions_integrity
