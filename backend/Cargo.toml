@@ -14,13 +14,18 @@ members = [
   "zomes/arbitration/coordinator",
   "zomes/messaging/integrity",
   "zomes/messaging/coordinator",
+  # Phase 2: Additional zomes (migrated to HDK 0.6.0/HDI 0.7.0)
+  "zomes/notifications/integrity",
+  "zomes/notifications/coordinator",
+  "zomes/security/integrity",
+  "zomes/security/coordinator",
+  "zomes/search/integrity",
+  "zomes/search/coordinator",
 ]
 
-# Excluded: Future zomes (not yet updated to HDK 0.6.0/HDI 0.7.0)
-# - zomes/notifications (needs updates)
-# - zomes/security (needs updates)
-# - zomes/monitoring (needs updates)
-# - zomes/search (needs updates)
+# Utility libraries (not Holochain zomes):
+# - zomes/monitoring (metrics aggregation library - used by coordinators)
+# Note: security and search are now proper zomes with integrity/coordinator split
 
 [workspace.dependencies]
 # Holochain 0.6.0 dependencies
