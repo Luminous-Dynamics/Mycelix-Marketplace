@@ -303,11 +303,75 @@ fn validate_create_listing(
 /// Validate listing updates
 fn validate_update_listing(
     listing: &Listing,
-    _action: &Update,
+    action: &Update,
 ) -> ExternResult<ValidateCallbackResult> {
-    // Run same validations as create
-    // TODO: Add additional checks like "only seller can update"
-    validate_listing_data(listing)
+    // 1. Run same data validations as create
+    let data_validation = validate_listing_data(listing)?;
+    if let ValidateCallbackResult::Invalid(reason) = data_validation {
+        return Ok(ValidateCallbackResult::Invalid(reason));
+    }
+
+    // 2. Authorization check: Only the original seller can update their listing
+    // The Update action contains the original_action_hash which created the entry
+    // We need to verify the author of the update matches the original author
+
+    // Get the original action that created this listing
+    let original_action_hash = action.original_action_address.clone();
+
+    // The author of the current update action
+    let updater = action.author.clone();
+
+    // In Holochain's validation model, we can check that the updater
+    // matches the original author by examining the chain history
+    // The must_get_action call fetches the original action
+    let original_action = must_get_action(original_action_hash.clone())?;
+
+    // Extract the original author from the action
+    let original_author = original_action.action().author().clone();
+
+    // Authorization check: the updater must be the original seller
+    if updater != original_author {
+        return Ok(ValidateCallbackResult::Invalid(
+            format!(
+                "Only the original seller can update this listing. Updater: {}, Original seller: {}",
+                updater, original_author
+            )
+        ));
+    }
+
+    // 3. Validate that certain fields cannot be changed (seller protection)
+    // The created_at timestamp should never change on updates
+    let original_entry = must_get_entry(action.original_entry_address.clone())?;
+
+    if let Entry::App(app_entry) = original_entry.as_content() {
+        // Try to deserialize the original listing
+        if let Ok(original_listing) = Listing::try_from(app_entry.clone().into_sb()) {
+            // created_at should never change
+            if listing.created_at != original_listing.created_at {
+                return Ok(ValidateCallbackResult::Invalid(
+                    "Cannot modify the creation timestamp".into()
+                ));
+            }
+
+            // updated_at should be greater than or equal to original
+            if listing.updated_at < original_listing.updated_at {
+                return Ok(ValidateCallbackResult::Invalid(
+                    "Update timestamp cannot be earlier than original".into()
+                ));
+            }
+
+            // Prevent resurrection of deleted listings
+            if original_listing.status == ListingStatus::Deleted
+                && listing.status != ListingStatus::Deleted
+            {
+                return Ok(ValidateCallbackResult::Invalid(
+                    "Cannot reactivate a deleted listing - create a new one instead".into()
+                ));
+            }
+        }
+    }
+
+    Ok(ValidateCallbackResult::Valid)
 }
 
 /// Validate IPFS CID format

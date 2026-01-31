@@ -246,6 +246,37 @@ pub fn finalize_arbitration(dispute_hash: ActionHash) -> ExternResult<Arbitratio
         )
     };
 
+    // Get transaction value for compensation calculation
+    let transaction: TransactionInfo = remote_calls::call_zome(
+        "transactions",
+        "get_transaction",
+        dispute.transaction_hash.clone(),
+    )?;
+
+    // Calculate compensation based on transaction value and dispute outcome
+    // Compensation formula:
+    // - Base: transaction value
+    // - Strong consensus (>0.85 or <0.15): full compensation
+    // - Moderate consensus (0.66-0.85 or 0.15-0.34): 75% compensation
+    // - Weak consensus (near threshold): 50% compensation
+    let consensus_strength = if weighted_vote > 0.5 {
+        weighted_vote
+    } else {
+        1.0 - weighted_vote
+    };
+
+    let compensation_multiplier = if consensus_strength >= 0.85 {
+        1.0  // Strong consensus: full compensation
+    } else if consensus_strength >= 0.75 {
+        0.75 // Moderate consensus: 75% compensation
+    } else {
+        0.50 // Weak consensus: 50% compensation
+    };
+
+    let compensation_cents = Some(
+        (transaction.transaction_value_cents as f64 * compensation_multiplier) as u64
+    );
+
     // Create result entry
     let result = ArbitrationResult {
         dispute_hash: dispute_hash.clone(),
@@ -253,11 +284,13 @@ pub fn finalize_arbitration(dispute_hash: ActionHash) -> ExternResult<Arbitratio
         loser: loser.clone(),
         weighted_vote,
         total_votes: votes.len() as u32,
-        compensation_cents: None, // TODO: Calculate based on transaction value
+        compensation_cents,
         summary: format!(
-            "Resolved in favor of {} with weighted vote of {:.2}",
+            "Resolved in favor of {} with weighted vote of {:.2}. Compensation: {} cents ({}% based on consensus strength)",
             if buyer_wins { "buyer" } else { "seller" },
-            weighted_vote
+            weighted_vote,
+            compensation_cents.unwrap_or(0),
+            (compensation_multiplier * 100.0) as u32
         ),
         finalized_at: time::now()?,
     };
@@ -287,7 +320,7 @@ pub fn finalize_arbitration(dispute_hash: ActionHash) -> ExternResult<Arbitratio
         UpdateMatlInput {
             agent: loser,
             successful: false,
-            transaction_value_cents: 0,
+            transaction_value_cents: transaction.transaction_value_cents,
         },
     )?;
 
@@ -463,6 +496,7 @@ pub struct ArbitrationResultOutput {
 pub struct TransactionInfo {
     pub buyer: AgentPubKey,
     pub seller: AgentPubKey,
+    pub transaction_value_cents: u64,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
