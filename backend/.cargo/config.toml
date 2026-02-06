@@ -2,13 +2,13 @@
 #
 # This file configures the build for wasm32-unknown-unknown target,
 # which is required for Holochain zomes.
+#
+# IMPORTANT: Use "custom" backend, NOT "wasm_js". The wasm_js backend
+# pulls in wasm-bindgen which is incompatible with Holochain's WASM runtime.
+# HDK 0.6 provides __getrandom_v03_custom.
 
 [target.wasm32-unknown-unknown]
-# Configure getrandom to use a custom RNG for WASM
-# Holochain provides its own entropy source
-rustflags = [
-  "--cfg=getrandom_backend=\"custom\""
-]
+rustflags = ['--cfg', 'getrandom_backend="custom"']
 
 [build]
 # Set the default target for this workspace
